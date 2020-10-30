@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "gusto"
+version = "0.1.0"
+description = ""
+authors = ["Joris Roovers"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+click = "^7.1.2"
+rich = "^9.1.0"
+arrow = "^0.17.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
