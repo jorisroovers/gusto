@@ -10,6 +10,8 @@ python = "^3.9"
 click = "^7.1.2"
 rich = "^9.1.0"
 arrow = "^0.17.0"
+starlette = "^0.13.8"
+uvicorn = "^0.12.2"
 
 [tool.poetry.dev-dependencies]
 
