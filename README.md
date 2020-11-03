@@ -10,9 +10,15 @@ Meal Planning tool (for personal use). Quick-and-dirty :-)
 # Install dependencies using poetry
 poetry install
 
+# Configure
+export GUSTO_RECIPES="myrecipes.csv"
+
 # Run cli
-python gusto/cli.py -r myrecipes.csv -w 1
+python gusto/cli.py -r $GUSTO_RECIPES -w 1
 
 # run webapp
-uvicorn gusto.web:app
+uvicorn --reload --log-config logconfig.ini  gusto.web:app
+
+# Don't auto-reload on changes
+uvicorn --log-config logconfig.ini  gusto.web:app
 ```

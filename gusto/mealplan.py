@@ -1,10 +1,12 @@
 import arrow
 import csv
 import copy
-
+import logging
 import random
+
 from rich.console import Console
 
+LOG = logging.getLogger("gusto.mealplan")
 console = Console()
 
 class Recipes:
@@ -12,17 +14,17 @@ class Recipes:
         self.recipes = {}
 
     def import_from_csv(self, filename) -> None:
-
-        # Parse CSV
+        LOG.debug("Reading from %s", filename)
         recipes = {}
-        records = csv.DictReader(filename)
-        record_count = 0
-        for record in records:
-            record_count+=1
-            record['parsed-labels'] = [l.strip() for l in record['Labels'].split(",")]
-            recipes[record['Name']] = record
+        with open(filename) as csv_file:
+            records = csv.DictReader(csv_file)
+            record_count = 0
+            for record in records:
+                record_count+=1
+                record['parsed-labels'] = [l.strip() for l in record['Labels'].split(",")]
+                recipes[record['Name']] = record
 
-        console.print(f"Read {record_count} recipes ({len(recipes)} unique) from [yellow]{filename.name}[/]")
+            LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from [yellow]{filename}[/]")
 
         self.recipes.update(recipes)
 

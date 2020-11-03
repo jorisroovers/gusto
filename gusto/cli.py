@@ -30,13 +30,14 @@ def print_mealplan(mealplan):
 
 
 @click.command()
-@click.option('--recipes-filename', "-r", help='CSV file containing recipies to generate a mealplan from', 
-              type=click.File(mode='r', encoding=None, errors='strict', lazy=None, atomic=False))
+@click.option('--recipes-filename', "-r", help='CSV file containing recipes to generate a mealplan from', 
+              type=click.Path(exists=True,file_okay=True, dir_okay=False, readable=True, resolve_path=True))
 @click.option('--num-weeks', "-w", help='Number of weeks', default=1)
 @click.option('--export', "-e", help='Export as CSV', default=False, is_flag=True)
 def main(recipes_filename, num_weeks, export):
     """ Gusto. Mealplanner."""
     recipes = Recipes()
+    
     recipes.import_from_csv(recipes_filename)
 
     mealplan = MealPlan()
