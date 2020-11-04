@@ -17,13 +17,13 @@ def print_mealplan(mealplan):
     table.add_column("Recipe")
     table.add_column("Labels", justify="right")
 
-    for i, menu in enumerate(mealplan):
+    for i, meal in enumerate(mealplan):
         # labels_str = choice['Labels'].replace(choice['match'], f"[b][u]{choice['match']}[/][/]")
-        table.add_row(menu['date'].format('dddd'), menu['date'].format('YYYY-MM-DD'), 
-                      menu['Name'], menu['Labels'])
+        table.add_row(meal.date.format('dddd'), meal.date.format('YYYY-MM-DD'), 
+                      meal.recipe['Name'], meal.recipe['Labels'])
         
         # Add empty row after each week
-        if ((menu['date'].format('dddd') == "Sunday") and (i != len(mealplan)-1)):
+        if ((meal.date.format('dddd') == "Sunday") and (i != len(mealplan)-1)):
             table.add_row()
 
     console.print(table)
@@ -51,6 +51,5 @@ def main(recipes_filename, num_weeks, export):
     print_mealplan(mealplan.mealplan)
 
     
-
 if __name__ == '__main__':
     main()

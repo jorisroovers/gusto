@@ -24,9 +24,16 @@ class Recipes:
                 record['parsed-labels'] = [l.strip() for l in record['Labels'].split(",")]
                 recipes[record['Name']] = record
 
-            LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from [yellow]{filename}[/]")
+            LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from {filename}")
 
         self.recipes.update(recipes)
+
+
+class Meal:
+
+    def __init__(self) -> None:
+        pass
+
 
 
 class MealPlan:
@@ -53,23 +60,30 @@ class MealPlan:
             day_constraints.insert(4, lambda r: "Zondigen" in r['parsed-labels'])
             
             for constraint in day_constraints:
-                menu = random.choice([ r for r in recipe_list.values() if constraint(r) ])
-                menu['date'] = start_date.shift(days=day_offset)
-                menu['Datum'] = menu['date'].format('MMM D, YYYY')
-                menu['Gedaan'] = "No"
-                # choice['match'] = label
-                menu['Weekd'] = ""
-                menu['Weekdag'] = ""
-                mealplan.append(recipe_list.pop(menu['Name']))
+                recipe = random.choice([ r for r in recipe_list.values() if constraint(r) ])
+                meal = Meal()
+                meal.recipe = recipe
+                meal.date = start_date.shift(days=day_offset)
+                meal.constraint = constraint
+                recipe_list.pop(meal.recipe['Name'])
+                mealplan.append(meal)
                 day_offset += 1
+
         self.mealplan = mealplan
 
 
     def export_to_csv(self, filename: str):
-        console.print(f"Exporting to [yellow]{filename}[/]")
+        LOG.info(f"Exporting to [yellow]{filename}[/]")
 
         with open(filename, 'w') as export_file:
             fieldnames = ["Gedaan", "Weekd", "Datum", "Name", "Labels", "Comments", "URL", "Score", "Weekdag" ]
             exporter = csv.DictWriter(export_file, fieldnames=fieldnames, extrasaction="ignore")
             exporter.writeheader()
-            exporter.writerows(self.mealplan)
+            for meal in self.mealplan:
+                meal.recipe.update({
+                    'Datum': meal.date.format('MMM D, YYYY'),
+                    'Gedaan':"No",
+                    'Weekdag': "",
+                    'Weekd': ""
+                })
+                exporter.writerow(meal.recipe)

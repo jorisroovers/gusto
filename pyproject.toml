@@ -12,6 +12,8 @@ rich = "^9.1.0"
 arrow = "^0.17.0"
 starlette = "^0.13.8"
 uvicorn = "^0.12.2"
+Jinja2 = "^2.11.2"
+aiofiles = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 
