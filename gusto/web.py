@@ -18,7 +18,8 @@ config = Config(".env")
 RECIPES_CSV = config('GUSTO_RECIPES')
 
 templates = Jinja2Templates(directory='templates')
-
+templates.env.variable_start_string = "[["
+templates.env.variable_end_string = "]]"
 
 ### REQUESTS ###########################################################################################################
 
@@ -33,9 +34,17 @@ async def regen(request):
 async def mealplan(request):
     # TODO: fix serialization of mealplan, use arrow.utcnow().for_json() maybe?
     mealplan = request.app.state.mealplan.mealplan
+    return_list = []
+    for meal in mealplan:
+        return_list.append(meal.for_json())
+
+
     LOG.debug("Mealplan %s", mealplan)
 
-    return JSONResponse({'mealplan': mealplan[0]['Name']})
+    return JSONResponse({'mealplan': return_list})
+
+async def recipes(request):
+    return JSONResponse({'recipes': request.app.state.recipes.recipes})
 
 ### STARTUP #############################################################################################################
 
@@ -50,6 +59,7 @@ def startup():
 app = Starlette(debug=True, on_startup=[startup], routes=[
     Route('/', homepage),
     Route('/mealplan', mealplan),
+    Route('/recipes', recipes),
     Route('/regen', regen),
     Mount('/static', StaticFiles(directory='static'), name='static')
 ])

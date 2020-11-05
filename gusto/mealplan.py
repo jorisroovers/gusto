@@ -1,6 +1,8 @@
+from os import name
 import arrow
 import csv
 import copy
+import json
 import logging
 import random
 
@@ -31,8 +33,13 @@ class Recipes:
 
 class Meal:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, recipe: dict, date, constraint) -> None:
+        self.recipe = recipe
+        self.date = date
+        self.constraint = constraint
+
+    def for_json(self):
+        return {"recipe": self.recipe, "date": self.date.for_json() }
 
 
 
@@ -61,10 +68,7 @@ class MealPlan:
             
             for constraint in day_constraints:
                 recipe = random.choice([ r for r in recipe_list.values() if constraint(r) ])
-                meal = Meal()
-                meal.recipe = recipe
-                meal.date = start_date.shift(days=day_offset)
-                meal.constraint = constraint
+                meal = Meal(recipe, start_date.shift(days=day_offset), constraint)
                 recipe_list.pop(meal.recipe['Name'])
                 mealplan.append(meal)
                 day_offset += 1
