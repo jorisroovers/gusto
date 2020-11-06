@@ -45,12 +45,12 @@ class Meal:
 
 class MealPlan:
 
-    def __init__(self) -> None:
+    def __init__(self, recipes) -> None:
         self.mealplan = []
+        self.recipe_pool = copy.deepcopy(recipes.recipes)
 
-    def generate_mealplan(self, recipes: Recipes, num_weeks: int) -> None:
+    def generate_mealplan(self, num_weeks: int) -> None:
         # Compose mealplan
-        recipe_list = copy.deepcopy(recipes.recipes)
         mealplan = []
         start_date  = arrow.utcnow().shift(weekday=0)
         day_offset = 0
@@ -67,14 +67,21 @@ class MealPlan:
             day_constraints.insert(4, lambda r: "Zondigen" in r['parsed-labels'])
             
             for constraint in day_constraints:
-                recipe = random.choice([ r for r in recipe_list.values() if constraint(r) ])
+                recipe = random.choice([ r for r in self.recipe_pool.values() if constraint(r) ])
                 meal = Meal(recipe, start_date.shift(days=day_offset), constraint)
-                recipe_list.pop(meal.recipe['Name'])
+                self.recipe_pool.pop(meal.recipe['Name'])
                 mealplan.append(meal)
                 day_offset += 1
 
         self.mealplan = mealplan
 
+
+    def regenerate_meal(self, meal_index: int) -> None:
+        meal = self.mealplan[meal_index]
+        recipe = random.choice([ r for r in self.recipe_pool.values() if meal.constraint(r) ])
+        # Add original meal recipe back to to the pool, so we can use it again
+        self.recipe_pool[recipe['Name']] = recipe
+        meal.recipe = recipe
 
     def export_to_csv(self, filename: str):
         LOG.info(f"Exporting to [yellow]{filename}[/]")

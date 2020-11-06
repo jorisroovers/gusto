@@ -27,7 +27,12 @@ async def homepage(request):
     return templates.TemplateResponse('index.html', {'request': request})
 
 async def regen(request):
-    request.app.state.mealplan.generate_mealplan(app.state.recipes, 1)
+    data = await request.json()
+    if data['meal_index'] == "all":
+        request.app.state.mealplan.generate_mealplan(1)
+    else:
+        request.app.state.mealplan.regenerate_meal(int(data['meal_index']))
+
     LOG.debug("Regenerated Mealplan %s", request.app.state.mealplan.mealplan)
     return JSONResponse({'status': "success"})
 
@@ -37,7 +42,6 @@ async def mealplan(request):
     return_list = []
     for meal in mealplan:
         return_list.append(meal.for_json())
-
 
     LOG.debug("Mealplan %s", mealplan)
 
@@ -51,8 +55,8 @@ async def recipes(request):
 def startup():
     recipes = Recipes()
     recipes.import_from_csv(os.path.realpath(RECIPES_CSV))
-    mealplan = MealPlan()
-    mealplan.generate_mealplan(recipes, 1)
+    mealplan = MealPlan(recipes=recipes)
+    mealplan.generate_mealplan(1)
     app.state.recipes = recipes
     app.state.mealplan = mealplan
 
@@ -60,7 +64,7 @@ app = Starlette(debug=True, on_startup=[startup], routes=[
     Route('/', homepage),
     Route('/mealplan', mealplan),
     Route('/recipes', recipes),
-    Route('/regen', regen),
+    Route('/regen', regen, methods=['POST']),
     Mount('/static', StaticFiles(directory='static'), name='static')
 ])
 

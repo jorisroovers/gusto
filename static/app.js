@@ -8,12 +8,13 @@ var app = new Vue({
         mealplan: []
     },
     methods: {
-        regen() {
+        regen(meal_index) {
             const self = this
-            axios.get('/regen').
-                then(function () {
-                    self.fetchData()
-                })
+            axios.post('/regen', {
+                "meal_index": meal_index
+            }).then(function () {
+                self.fetchData()
+            })
         },
         fetchData() {
             console.log("fetchData")
@@ -24,7 +25,9 @@ var app = new Vue({
                     for (meal of response.data.mealplan) {
                         console.log(meal);
                         table_mealplan.push({
-                            "date": meal.date, "recipe": meal.recipe.Name,
+                            "weekday": moment(meal.date).format('dddd'),
+                            "date": moment(meal.date).format('YYYY-MM-DD'),
+                            "recipe": meal.recipe.Name,
                             "labels": meal.recipe.Labels
                         })
 
@@ -33,3 +36,6 @@ var app = new Vue({
         }
     }
 })
+
+// November 6th 2020, 9:36:47 am
+moment().format('dddd');           

@@ -40,8 +40,8 @@ def main(recipes_filename, num_weeks, export):
     
     recipes.import_from_csv(recipes_filename)
 
-    mealplan = MealPlan()
-    mealplan.generate_mealplan(recipes, num_weeks)
+    mealplan = MealPlan(recipes)
+    mealplan.generate_mealplan(num_weeks)
     
     if export:
         timestamp = arrow.now().format('YYYY-MM-DD_HH-mm-ss')

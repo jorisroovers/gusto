@@ -19,28 +19,35 @@
     </nav>
     <section class="section" id="mealplan">
         <h1 class="is-size-4">Mealplan</h1>
-        <button class="button" v-on:click="regen">Regen all</button>
+        <button class="button no-print" v-on:click="regen('all')">Regen all</button>
         <table class="table">
             <thead>
                 <tr>
+                    <th>Weekday</th>
                     <th>Date</th>
                     <th>Recipe</th>
                     <th>Labels</th>
-                    <th>Actions</th>
+                    <th class="no-print">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="meal in mealplan">
-                    <td>{{meal['date']}}</td>
-                    <td>{{meal['recipe']}}</td>
-                    <td>{{meal['labels']}}</td>
-                    <td>Regen</td>
+                <tr v-for="(meal, index) in mealplan">
+                    <td class="no-wrap">{{ meal.weekday }}</td>
+                    <td class="no-wrap">{{ meal.date }}</td>
+                    <td>{{ meal.recipe }}</td>
+                    <td>
+                        <span class="tag" v-for="label in meal.labels.split(',')">
+                            {{label}}
+                        </span>
+                    </td>
+                    <td class="no-print"><button class="button" v-on:click="regen(index)">Regen</button></td>
                 </tr>
             </tbody>
         </table>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@0.21.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="/static/app.js"></script>
 </body>
 
