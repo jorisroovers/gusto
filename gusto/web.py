@@ -24,7 +24,12 @@ templates.env.variable_end_string = "]]"
 ### REQUESTS ###########################################################################################################
 
 async def homepage(request):
-    return templates.TemplateResponse('index.html', {'request': request})
+    return templates.TemplateResponse('mealplan.html', {'request': request})
+
+async def recipes(request):
+    return templates.TemplateResponse('recipes.html', {'request': request})
+
+### API ################################################################################################################
 
 async def regen(request):
     data = await request.json()
@@ -47,7 +52,7 @@ async def mealplan(request):
 
     return JSONResponse({'mealplan': return_list})
 
-async def recipes(request):
+async def api_recipes(request):
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
 
 ### STARTUP #############################################################################################################
@@ -62,9 +67,10 @@ def startup():
 
 app = Starlette(debug=True, on_startup=[startup], routes=[
     Route('/', homepage),
-    Route('/mealplan', mealplan),
     Route('/recipes', recipes),
-    Route('/regen', regen, methods=['POST']),
-    Mount('/static', StaticFiles(directory='static'), name='static')
+    Mount('/static', StaticFiles(directory='static'), name='static'),
+    Route('/api/mealplan', mealplan),
+    Route('/api/recipes', api_recipes),
+    Route('/api/regen', regen, methods=['POST']),
 ])
 

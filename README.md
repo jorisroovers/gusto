@@ -22,3 +22,11 @@ uvicorn --reload --log-config logconfig.ini  gusto.web:app
 # Don't auto-reload on changes
 uvicorn --log-config logconfig.ini  gusto.web:app
 ```
+
+# TODO
+[ ] Export to CSV
+[ ] Serve from docker containers
+[ ] Store in DB ()
+[ ] Go forth/back a week
+[ ] Show contraints names in table
+[ ] Highlight today

@@ -1,0 +1,30 @@
+{% extends "layout/default.html" %}
+{% block content %}
+<section class="section" id="recipes">
+    <h1 class="is-size-4">Recipes</h1>
+    <table class="table is-striped" id="recipes-table">
+        <thead>
+            <tr>
+                <th>Weekday</th>
+                <th>Date</th>
+                <th>Recipe</th>
+                <th>Labels</th>
+                <th class="no-print">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(meal, index) in mealplan">
+                <td class="no-wrap">{{ meal.weekday }}</td>
+                <td class="no-wrap">{{ meal.date }}</td>
+                <td>{{ meal.recipe }}</td>
+                <td>
+                    <span class="tag" :data-value="label.trim()" v-for="label in meal.labels.split(',')">
+                        {{label}}
+                    </span>
+                </td>
+                <td class="no-print"><button class="button" v-on:click="regen(index)">Regen</button></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+{% endblock %}

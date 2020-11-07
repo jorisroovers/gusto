@@ -1,11 +1,65 @@
+.no-wrap {
+    white-space: nowrap;
+}
+
+#mealplan-table {
+    width: 50%;
+}
+
+/* TAGS */
+
+.tag {
+    margin: 0 2px;
+}
+
+.tag[data-value="Vis"] {
+    background-color: rgb(141, 177, 245);
+    color: white;
+}
+
+.tag[data-value="Salade"] {
+    background-color: rgb(145, 245, 141);
+}
+
+.tag[data-value="Pasta"] {
+    background-color: rgb(245, 221, 141);
+}
+
+.tag[data-value="Kip"] {
+    background-color: rgb(177, 135, 0);
+    color: white;
+}
+
+.tag[data-value="Vegetarisch"] {
+    background-color: rgb(13, 167, 7);
+    color: white;
+}
+
+.tag[data-value="Brood"] {
+    background-color: rgb(134, 82, 2);
+    color: white;
+}
+
+.tag[data-value="Zondigen"] {
+    background-color: rgb(179, 25, 5);
+    color: white;
+}
+
+
+/* Put print styles at the bottom so we override previous styles */
 @media print {
 
     .no-print,
     .no-print * {
         display: none !important;
     }
-}
 
-.no-wrap {
-    white-space: nowrap;
+
+    #mealplan-table {
+        width: 100%;
+    }
+
+    .tag {
+        color: #000 !important;
+    }
 }

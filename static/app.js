@@ -10,7 +10,7 @@ var app = new Vue({
     methods: {
         regen(meal_index) {
             const self = this
-            axios.post('/regen', {
+            axios.post('/api/regen', {
                 "meal_index": meal_index
             }).then(function () {
                 self.fetchData()
@@ -20,7 +20,7 @@ var app = new Vue({
             console.log("fetchData")
             this.mealplan = []
             let table_mealplan = this.mealplan
-            axios.get('/mealplan')
+            axios.get('/api/mealplan')
                 .then(function (response) {
                     for (meal of response.data.mealplan) {
                         console.log(meal);
@@ -36,6 +36,3 @@ var app = new Vue({
         }
     }
 })
-
-// November 6th 2020, 9:36:47 am
-moment().format('dddd');           
