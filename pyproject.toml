@@ -6,7 +6,7 @@ authors = ["Joris Roovers"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 click = "^7.1.2"
 rich = "^9.1.0"
 arrow = "^0.17.0"

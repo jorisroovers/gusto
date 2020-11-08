@@ -154,8 +154,8 @@ standard = ["websockets (>=8.0.0,<9.0.0)", "watchgod (>=0.6,<0.7)", "python-dote
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.9"
-content-hash = "33a6e97363b5da92361d811d22ed944c91e013ab8a60992427657e7efab395c6"
+python-versions = "^3.8"
+content-hash = "3b3671fd48e66bff27ddfe3e8932103fd78bf7255e36d77ab85b211da855e186"
 
 [metadata.files]
 aiofiles = [

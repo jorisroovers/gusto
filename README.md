@@ -14,13 +14,19 @@ poetry install
 export GUSTO_RECIPES="myrecipes.csv"
 
 # Run cli
-python gusto/cli.py -r $GUSTO_RECIPES -w 1
+python gusto/gusto/cli.py -r $GUSTO_RECIPES -w 1
 
 # run webapp
-uvicorn --reload --log-config logconfig.ini  gusto.web:app
+uvicorn --reload --log-config config/logconfig.ini gusto.gusto.web:app
 
 # Don't auto-reload on changes
-uvicorn --log-config logconfig.ini  gusto.web:app
+uvicorn --log-config config/logconfig.ini gusto.gusto.web:app
+```
+
+#  Docker
+```sh
+docker build -t gusto:latest .
+docker run -d --name gusto -p 8000:80 --env-file config/config.env  -v $(pwd)/config:/config  gusto
 ```
 
 # TODO

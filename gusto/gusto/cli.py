@@ -1,5 +1,5 @@
 
-from gusto.mealplan import MealPlan, Recipes
+from .mealplan import MealPlan, Recipes
 
 import arrow
 import click
