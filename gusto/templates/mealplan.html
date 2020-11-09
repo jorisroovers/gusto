@@ -3,13 +3,14 @@
 <section class="section" id="mealplan">
     <h1 class="is-size-4">Mealplan</h1>
     <button class="button no-print" v-on:click="regen('all')">Regen all</button>
+    <button class="button no-print" v-on:click="exportMealplan">Export</button>
     <table class="table is-striped" id="mealplan-table">
         <thead>
             <tr>
                 <th>Weekday</th>
                 <th>Date</th>
                 <th>Recipe</th>
-                <th>Labels</th>
+                <th>Tags</th>
                 <th class="no-print">Actions</th>
             </tr>
         </thead>
@@ -19,8 +20,8 @@
                 <td class="no-wrap">{{ meal.date }}</td>
                 <td>{{ meal.recipe }}</td>
                 <td>
-                    <span class="tag" :data-value="label.trim()" v-for="label in meal.labels.split(',')">
-                        {{label}}
+                    <span class="tag" :data-value="tag" v-for="tag in meal.tags">
+                        {{tag}}
                     </span>
                 </td>
                 <td class="no-print"><button class="button" v-on:click="regen(index)">Regen</button></td>

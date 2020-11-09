@@ -42,7 +42,6 @@ async def regen(request):
     return JSONResponse({'status': "success"})
 
 async def mealplan(request):
-    # TODO: fix serialization of mealplan, use arrow.utcnow().for_json() maybe?
     mealplan = request.app.state.mealplan.mealplan
     return_list = []
     for meal in mealplan:
@@ -53,6 +52,10 @@ async def mealplan(request):
     return JSONResponse({'mealplan': return_list})
 
 async def api_recipes(request):
+    return JSONResponse({'recipes': request.app.state.recipes.recipes})
+
+async def api_export(request):
+    request.app.state.mealplan.export_to_csv("export.csv")
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
 
 ### STARTUP #############################################################################################################
@@ -72,5 +75,6 @@ app = Starlette(debug=True, on_startup=[startup], routes=[
     Route('/api/mealplan', mealplan),
     Route('/api/recipes', api_recipes),
     Route('/api/regen', regen, methods=['POST']),
+    Route('/api/export', api_export, methods=['POST']),
 ])
 

@@ -1,7 +1,6 @@
-var app = new Vue({
+var mealplan = new Vue({
     el: '#mealplan',
     created() {
-        console.log("created")
         this.fetchData();
     },
     data: {
@@ -16,19 +15,25 @@ var app = new Vue({
                 self.fetchData()
             })
         },
+        exportMealplan() {
+            const self = this
+
+            axios.post('/api/export').then(function () {
+                console.log("export: done");
+            })
+        },
         fetchData() {
-            console.log("fetchData")
             this.mealplan = []
-            let table_mealplan = this.mealplan
+            const self = this
             axios.get('/api/mealplan')
                 .then(function (response) {
                     for (meal of response.data.mealplan) {
                         console.log(meal);
-                        table_mealplan.push({
+                        self.mealplan.push({
                             "weekday": moment(meal.date).format('dddd'),
                             "date": moment(meal.date).format('YYYY-MM-DD'),
                             "recipe": meal.recipe.Name,
-                            "labels": meal.recipe.Labels
+                            "tags": meal.recipe['parsed-tags']
                         })
 
                     }
@@ -36,3 +41,24 @@ var app = new Vue({
         }
     }
 })
+
+var recipes = new Vue({
+    el: '#recipes',
+    created() {
+        this.fetchData();
+    },
+    data: {
+        recipes: []
+    },
+    methods: {
+        fetchData() {
+            console.log("fetchData -- recipes")
+            this.recipes = []
+            const self = this
+            axios.get('/api/recipes')
+                .then(function (response) {
+                    self.recipes = response.data.recipes
+                })
+        }
+    }
+});

@@ -10,8 +10,10 @@ Meal Planning tool (for personal use). Quick-and-dirty :-)
 # Install dependencies using poetry
 poetry install
 
+cd gusto
+
 # Configure
-export GUSTO_RECIPES="myrecipes.csv"
+export GUSTO_RECIPES="../config/Meal-Planning.csv"
 
 # Run cli
 python gusto/gusto/cli.py -r $GUSTO_RECIPES -w 1

@@ -15,12 +15,12 @@ def print_mealplan(mealplan):
     table.add_column("Weekday", style="dim", width=12)
     table.add_column("Date", style="dim")
     table.add_column("Recipe")
-    table.add_column("Labels", justify="right")
+    table.add_column("Tags", justify="right")
 
     for i, meal in enumerate(mealplan):
         # labels_str = choice['Labels'].replace(choice['match'], f"[b][u]{choice['match']}[/][/]")
         table.add_row(meal.date.format('dddd'), meal.date.format('YYYY-MM-DD'), 
-                      meal.recipe['Name'], meal.recipe['Labels'])
+                      meal.recipe['Name'], meal.recipe['Tags'])
         
         # Add empty row after each week
         if ((meal.date.format('dddd') == "Sunday") and (i != len(mealplan)-1)):
