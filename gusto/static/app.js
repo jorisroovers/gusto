@@ -28,14 +28,8 @@ var mealplan = new Vue({
             axios.get('/api/mealplan')
                 .then(function (response) {
                     for (meal of response.data.mealplan) {
-                        console.log(meal);
-                        self.mealplan.push({
-                            "weekday": moment(meal.date).format('dddd'),
-                            "date": moment(meal.date).format('YYYY-MM-DD'),
-                            "recipe": meal.recipe.Name,
-                            "tags": meal.recipe['parsed-tags']
-                        })
-
+                        meal.date = moment(meal.date)
+                        self.mealplan.push(meal);
                     }
                 })
         }

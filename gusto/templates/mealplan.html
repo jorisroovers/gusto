@@ -10,17 +10,19 @@
                 <th>Weekday</th>
                 <th>Date</th>
                 <th>Recipe</th>
+                <th>Constraint</th>
                 <th>Tags</th>
                 <th class="no-print">Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(meal, index) in mealplan">
-                <td class="no-wrap">{{ meal.weekday }}</td>
-                <td class="no-wrap">{{ meal.date }}</td>
-                <td>{{ meal.recipe }}</td>
-                <td>
-                    <span class="tag" :data-value="tag" v-for="tag in meal.tags">
+            <tr v-for="(meal, index) in mealplan"  v-bind:class="{'is-selected': meal.date.isSame(new Date(), 'day')}">
+                <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
+                <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
+                <td>{{ meal.recipe.Name }}</td>
+                <td class="no-wrap">{{ meal.constraint.title }}</td>
+                <td class="no-wrap">
+                    <span class="tag" :data-value="tag" v-for="tag in meal.recipe['parsed-tags']">
                         {{tag}}
                     </span>
                 </td>

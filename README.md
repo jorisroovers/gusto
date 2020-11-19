@@ -10,6 +10,8 @@ Meal Planning tool (for personal use). Quick-and-dirty :-)
 # Install dependencies using poetry
 poetry install
 
+poetry shell
+
 cd gusto
 
 # Configure
@@ -19,10 +21,7 @@ export GUSTO_RECIPES="../config/Meal-Planning.csv"
 python gusto/gusto/cli.py -r $GUSTO_RECIPES -w 1
 
 # run webapp
-uvicorn --reload --log-config config/logconfig.ini gusto.gusto.web:app
-
-# Don't auto-reload on changes
-uvicorn --log-config config/logconfig.ini gusto.gusto.web:app
+uvicorn --reload --log-config ../config/logconfig.ini gusto.web:app
 ```
 
 #  Docker
@@ -32,9 +31,11 @@ docker run -d --name gusto -p 8000:80 --env-file config/config.env  -v $(pwd)/co
 ```
 
 # TODO
-[ ] Export to CSV
-[ ] Serve from docker containers
-[ ] Store in DB ()
-[ ] Go forth/back a week
-[ ] Show contraints names in table
-[ ] Highlight today
+- [ ] Export to CSV
+- [ ] Serve from docker containers
+- [ ] Store in DB ()
+- [ ] Go forth/back a week
+- [x] Show constraints names in table
+- [ ] Highlight today
+- [ ] Toggle Edit button
+- [ ] Notification System

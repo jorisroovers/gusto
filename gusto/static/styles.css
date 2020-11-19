@@ -45,6 +45,20 @@
     color: white;
 }
 
+.tag[data-value="Steak"] {
+    background-color: rgb(245, 173, 173);
+}
+
+.tag[data-value="Asian"] {
+    background-color: rgb(232, 247, 22);
+}
+
+.tag[data-value="Italiaans"] {
+    background-color: white;
+    color: green;
+    border: 1px solid  rgb(179, 25, 5);
+}
+
 
 /* Put print styles at the bottom so we override previous styles */
 @media print {
