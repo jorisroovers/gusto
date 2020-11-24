@@ -1,19 +1,38 @@
 var mealplan = new Vue({
     el: '#mealplan',
     created() {
-        this.fetchData();
+        this.changeWeek("today")
+        // this.fetchData();
     },
     data: {
+        start_date: null,
         mealplan: []
     },
     methods: {
-        regen(meal_index) {
+        regenMealPlan(meal_index) {
             const self = this
-            axios.post('/api/regen', {
+            axios.post('/api/regen_mealplan', {
+                "start_date": self.start_date
+            }).then(function () {
+                self.fetchData()
+            })
+        },
+        regenMeal(meal_index) {
+            const self = this
+            axios.post('/api/regen_meal', {
                 "meal_index": meal_index
             }).then(function () {
                 self.fetchData()
             })
+        },
+        changeWeek(weekIncrease) {
+            if (weekIncrease === "today") {
+                this.start_date = moment().startOf('week').day('Monday')
+            } else {
+                this.start_date = this.start_date.add(weekIncrease, 'weeks').startOf('week').day('Monday')
+            }
+            // TODO: remove the regenMealplan() call here, we should just fetch here, not regen
+            this.regenMealPlan();
         },
         exportMealplan() {
             const self = this
@@ -27,7 +46,7 @@ var mealplan = new Vue({
             const self = this
             axios.get('/api/mealplan')
                 .then(function (response) {
-                    for (meal of response.data.mealplan) {
+                    for (meal of response.data.mealplan.meals) {
                         meal.date = moment(meal.date)
                         self.mealplan.push(meal);
                     }

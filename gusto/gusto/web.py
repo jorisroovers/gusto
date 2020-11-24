@@ -1,3 +1,4 @@
+import arrow
 import logging
 import os
 
@@ -8,7 +9,7 @@ from starlette.config import Config
 from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 
-from .mealplan import MealPlan, Recipes
+from .mealplan import MealPlan, MealPlanGenerator, Recipes
 
 LOG = logging.getLogger("gusto.web")
 
@@ -31,25 +32,25 @@ async def recipes(request):
 
 ### API ################################################################################################################
 
-async def regen(request):
-    data = await request.json()
-    if data['meal_index'] == "all":
-        request.app.state.mealplan.generate_mealplan(1)
-    else:
-        request.app.state.mealplan.regenerate_meal(int(data['meal_index']))
 
-    LOG.debug("Regenerated Mealplan %s", request.app.state.mealplan.mealplan)
+async def regen_mealplan(request):
+    data = await request.json()
+    start_date = arrow.get(data['start_date'])
+    request.app.state.mealplan = request.app.state.mealplan_generator.generate_mealplan(start_date, 1)
+    return JSONResponse({'status': "success"})
+
+async def regen_meal(request):
+    data = await request.json()
+    meal_index = int(data['meal_index'])
+    meal = request.app.state.mealplan.meals[meal_index]
+    new_meal = request.app.state.mealplan_generator.regenerate_meal(meal)
+    request.app.state.mealplan.meals[meal_index] = new_meal
+
+    LOG.debug("Regenerated Mealplan %s", request.app.state.mealplan)
     return JSONResponse({'status': "success"})
 
 async def mealplan(request):
-    mealplan = request.app.state.mealplan.mealplan
-    return_list = []
-    for meal in mealplan:
-        return_list.append(meal.for_json())
-
-    LOG.debug("Mealplan %s", mealplan)
-
-    return JSONResponse({'mealplan': return_list})
+    return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
 
 async def api_recipes(request):
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
@@ -63,10 +64,13 @@ async def api_export(request):
 def startup():
     recipes = Recipes()
     recipes.import_from_csv(os.path.realpath(RECIPES_CSV))
-    mealplan = MealPlan(recipes=recipes)
-    mealplan.generate_mealplan(1)
     app.state.recipes = recipes
-    app.state.mealplan = mealplan
+    app.state.mealplan_generator = MealPlanGenerator(app.state.recipes)
+    # Next Monday
+    start_date  = arrow.utcnow().shift(weekday=0)
+    # This week's Monday
+    # start_date  = arrow.utcnow().shift(weeks=-1, weekday=0)
+    app.state.mealplan =  None # app.state.mealplan_generator.generate_mealplan(start_date, 1)
 
 app = Starlette(debug=True, on_startup=[startup], routes=[
     Route('/', homepage),
@@ -74,7 +78,8 @@ app = Starlette(debug=True, on_startup=[startup], routes=[
     Mount('/static', StaticFiles(directory='static'), name='static'),
     Route('/api/mealplan', mealplan),
     Route('/api/recipes', api_recipes),
-    Route('/api/regen', regen, methods=['POST']),
+    Route('/api/regen_meal', regen_meal, methods=['POST']),
+    Route('/api/regen_mealplan', regen_mealplan, methods=['POST']),
     Route('/api/export', api_export, methods=['POST']),
 ])
 

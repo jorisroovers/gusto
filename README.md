@@ -39,3 +39,5 @@ docker run -d --name gusto -p 8000:80 --env-file config/config.env  -v $(pwd)/co
 - [ ] Highlight today
 - [ ] Toggle Edit button
 - [ ] Notification System
+- [ ] Recipe Search/filter
+- [ ] Recipe Selection search based on constraint

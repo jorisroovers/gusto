@@ -2,8 +2,16 @@
 {% block content %}
 <section class="section" id="mealplan">
     <h1 class="is-size-4">Mealplan</h1>
-    <button class="button no-print" v-on:click="regen('all')">Regen all</button>
-    <button class="button no-print" v-on:click="exportMealplan">Export</button>
+    <div>
+        <button class="button no-print" v-on:click="regenMealPlan">Regen all</button>
+        <button class="button no-print" v-on:click="exportMealplan">Export</button>
+    </div>
+    <div>
+        <button class="button no-print" v-on:click="changeWeek(-1)">&lt;</button>
+        {{start_date.format('YYYY-MM-DD') }}
+        <button class="button no-print" v-on:click="changeWeek('today')">today</button>
+        <button class="button no-print" v-on:click="changeWeek(1)">&gt;</button>
+    </div>
     <table class="table is-striped" id="mealplan-table">
         <thead>
             <tr>
@@ -16,17 +24,22 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(meal, index) in mealplan"  v-bind:class="{'is-selected': meal.date.isSame(new Date(), 'day')}">
+            <tr v-for="(meal, index) in mealplan" v-bind:class="{'is-selected': meal.date.isSame(new Date(), 'day')}">
                 <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
                 <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
-                <td>{{ meal.recipe.Name }}</td>
+                <td>
+                    <a v-if="meal.recipe.URL" :href="meal.recipe.URL" target="_blank">
+                        {{ meal.recipe.Name }}
+                    </a>
+                    <template v-else>{{ meal.recipe.Name }}</template>
+                </td>
                 <td class="no-wrap">{{ meal.constraint.title }}</td>
                 <td class="no-wrap">
                     <span class="tag" :data-value="tag" v-for="tag in meal.recipe['parsed-tags']">
                         {{tag}}
                     </span>
                 </td>
-                <td class="no-print"><button class="button" v-on:click="regen(index)">Regen</button></td>
+                <td class="no-print"><button class="button" v-on:click="regenMeal(index)">Regen</button></td>
             </tr>
         </tbody>
     </table>
