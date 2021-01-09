@@ -2,6 +2,9 @@ import arrow
 import logging
 import os
 
+import databases
+import sqlalchemy
+
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Route, Mount
@@ -17,6 +20,7 @@ LOG = logging.getLogger("gusto.web")
 
 config = Config(".env")
 RECIPES_CSV = config('GUSTO_RECIPES')
+DATABASE_URL = config('DATABASE_URL')
 
 templates = Jinja2Templates(directory='templates')
 templates.env.variable_start_string = "[["

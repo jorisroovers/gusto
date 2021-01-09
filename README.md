@@ -30,7 +30,21 @@ docker build -t gusto:latest .
 docker run -d --name gusto -p 8000:80 --env-file config/config.env  -v $(pwd)/config:/config  gusto
 ```
 
+# Alembic
+[Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html) is used for Database management and migrations
+
+```sh
+# To initially setup alembic
+alembic init alembic
+
+# Run migrations
+alembic upgrade head
+```
+
+
 # TODO
+- [ ] Recipe Selection search based on constraint
+- [ ] Constraint list export
 - [ ] Export to CSV
 - [ ] Serve from docker containers
 - [ ] Store in DB ()
@@ -40,4 +54,3 @@ docker run -d --name gusto -p 8000:80 --env-file config/config.env  -v $(pwd)/co
 - [ ] Toggle Edit button
 - [ ] Notification System
 - [ ] Recipe Search/filter
-- [ ] Recipe Selection search based on constraint

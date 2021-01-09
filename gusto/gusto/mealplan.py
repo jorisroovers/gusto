@@ -75,6 +75,9 @@ class Meal:
     def for_json(self) -> dict:
         return {"recipe": self.recipe, "date": self.date.for_json(), "constraint": self.constraint.for_json() }
 
+    def __str__(self) -> str:
+        return self.recipe
+
 class MealPlan:
 
     def __init__(self) -> None:
