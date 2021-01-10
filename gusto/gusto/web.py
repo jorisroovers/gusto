@@ -65,8 +65,9 @@ async def api_export(request):
 
 ### STARTUP #############################################################################################################
 
-def startup():
+async def startup():
     recipes = Recipes()
+    await recipes.import_new2()
     recipes.import_from_csv(os.path.realpath(RECIPES_CSV))
     app.state.recipes = recipes
     app.state.mealplan_generator = MealPlanGenerator(app.state.recipes)
@@ -76,7 +77,11 @@ def startup():
     # start_date  = arrow.utcnow().shift(weeks=-1, weekday=0)
     app.state.mealplan =  None # app.state.mealplan_generator.generate_mealplan(start_date, 1)
 
-app = Starlette(debug=True, on_startup=[startup], routes=[
+def shutdown():
+    LOG.debug("Shutting Down")
+
+
+app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes=[
     Route('/', homepage),
     Route('/recipes', recipes),
     Mount('/static', StaticFiles(directory='static'), name='static'),

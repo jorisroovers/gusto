@@ -1,18 +1,49 @@
-from os import name
-import csv
-import uuid
 import copy
+import csv
 import logging
 import random
+import uuid
+from os import name
+
+import sqlalchemy
+import databases
+from sqlalchemy.orm import sessionmaker
+
 
 from rich.console import Console
 
 LOG = logging.getLogger("gusto.mealplan")
 console = Console()
 
+from .models import Account
+
 class Recipes:
     def __init__(self) -> None:
         self.recipes = []
+
+    async def import_new2(self):
+        engine = sqlalchemy.create_engine("sqlite:///../gusto.db")
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        for account in session.query(Account):
+            print(account)
+
+    async def import_new(self):
+        metadata = sqlalchemy.MetaData()
+        accounts = sqlalchemy.Table(
+            "account",
+            metadata,
+            sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+            sqlalchemy.Column("name", sqlalchemy.String),
+            sqlalchemy.Column("description", sqlalchemy.Unicode),
+        )
+
+        database = databases.Database("sqlite:///../gusto.db")
+        database.connect()
+
+        query = accounts.select()
+        results = await database.fetch_all(query)
+        print(results)
 
     def import_from_csv(self, filename) -> None:
         LOG.debug("Reading from %s", filename)

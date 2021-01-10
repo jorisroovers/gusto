@@ -15,7 +15,7 @@ poetry shell
 cd gusto
 
 # Configure
-export GUSTO_RECIPES="../config/Meal-Planning.csv"
+export GUSTO_RECIPES="../config/Meal-Planning.csv"; export DATABASE_URL="sqlite:///../gusto.db"
 
 # Run cli
 python gusto/gusto/cli.py -r $GUSTO_RECIPES -w 1
