@@ -18,12 +18,14 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        'accounts',
+        'recipes',
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', sa.String(50), nullable=False),
-        sa.Column('description', sa.Unicode(200)),
+        sa.Column('name', sa.Unicode(75), nullable=False),
+        sa.Column('description', sa.Unicode(200)), # not currently used
+        sa.Column('comments', sa.Unicode(200)),
+        sa.Column('url', sa.Unicode(200)),
+        sa.Column('tags', sa.Unicode(200)),
     )
-
 
 def downgrade():
     pass

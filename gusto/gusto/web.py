@@ -1,18 +1,18 @@
-import arrow
 import logging
 import os
 
-import databases
-import sqlalchemy
-
+import arrow
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
-from starlette.routing import Route, Mount
 from starlette.config import Config
-from starlette.templating import Jinja2Templates
+from starlette.responses import JSONResponse
+from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 
-from .mealplan import MealPlan, MealPlanGenerator, Recipes
+from .mealplan import MealPlan, MealPlanGenerator, RecipesController
+
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 
 LOG = logging.getLogger("gusto.web")
 
@@ -66,8 +66,13 @@ async def api_export(request):
 ### STARTUP #############################################################################################################
 
 async def startup():
-    recipes = Recipes()
-    await recipes.import_new2()
+    engine = sqlalchemy.create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    app.state.db_session = Session()
+
+    recipes = RecipesController(app.state.db_session)
+    LOG.debug("NEW")
+    print(recipes.list())
     recipes.import_from_csv(os.path.realpath(RECIPES_CSV))
     app.state.recipes = recipes
     app.state.mealplan_generator = MealPlanGenerator(app.state.recipes)
@@ -79,6 +84,8 @@ async def startup():
 
 def shutdown():
     LOG.debug("Shutting Down")
+    app.state.db_session.close()
+    LOG.debug("Shudown complete. bye 👋")
 
 
 app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes=[

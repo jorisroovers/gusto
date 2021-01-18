@@ -3,12 +3,15 @@ from sqlalchemy import Column, Integer, String,Unicode
 
 Base = declarative_base()
 
-class Account(Base):
-    __tablename__ = 'accounts'
+class Recipe(Base):
+    __tablename__ = 'recipes'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(Unicode)
     description = Column(Unicode)
+    comments = Column(Unicode)
+    url = Column(Unicode)
+    tags = Column(Unicode)
 
     def __repr__(self):
-       return "<Account(name='%s', description='%s')>" % (self.name, self.description)
+       return f"<Recipe(name='{self.name}')>"

@@ -5,49 +5,31 @@ import random
 import uuid
 from os import name
 
-import sqlalchemy
-import databases
-from sqlalchemy.orm import sessionmaker
-
 
 from rich.console import Console
 
 LOG = logging.getLogger("gusto.mealplan")
 console = Console()
 
-from .models import Account
+from . import models
 
-class Recipes:
-    def __init__(self) -> None:
+class Controller:
+
+    def __init__(self, db_session) -> None:
+        self.db = db_session
+
+class RecipesController(Controller):
+    def __init__(self, db_session) -> None:
+        super().__init__(db_session)
         self.recipes = []
 
-    async def import_new2(self):
-        engine = sqlalchemy.create_engine("sqlite:///../gusto.db")
-        Session = sessionmaker(bind=engine)
-        session = Session()
-        for account in session.query(Account):
-            print(account)
-
-    async def import_new(self):
-        metadata = sqlalchemy.MetaData()
-        accounts = sqlalchemy.Table(
-            "account",
-            metadata,
-            sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-            sqlalchemy.Column("name", sqlalchemy.String),
-            sqlalchemy.Column("description", sqlalchemy.Unicode),
-        )
-
-        database = databases.Database("sqlite:///../gusto.db")
-        database.connect()
-
-        query = accounts.select()
-        results = await database.fetch_all(query)
-        print(results)
+    def list(self):
+        return self.db.query(models.Recipe).all()
 
     def import_from_csv(self, filename) -> None:
         LOG.debug("Reading from %s", filename)
         recipes = {}
+        existing_recipes = {(recipe.name, recipe) for recipe in self.list()}
         with open(filename) as csv_file:
             records = csv.DictReader(csv_file)
             record_count = 0
@@ -56,8 +38,19 @@ class Recipes:
                 record['parsed-tags'] = [l.strip() for l in record['Tags'].split(",") if l.strip() != ""]
                 recipes[record['Name']] = record
 
-            LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from {filename}")
+                # TODO: continue here:
+                # - actually fix this lookup here, because it's still adding duplicate records
+                # - add other fields to DB records being added
+                # - this is really a mealplan import from the Notion CSV, this should create DB records in different
+                #   tables: recipes, meals, etc
+                # - remove return value. We should just do another list() operation to get all recipes/meals
 
+                if record['Name'] not in existing_recipes:
+                    db_record = models.Recipe(name=record['Name'])
+                    self.db.add(db_record)
+
+            LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from {filename}")
+        self.db.commit()
         self.recipes.extend(recipes.values())
 
 
