@@ -20,9 +20,13 @@ LOG = logging.getLogger("gusto.web")
 
 config = Config(".env")
 RECIPES_CSV = config('GUSTO_RECIPES')
-DATABASE_URL = config('DATABASE_URL')
+DATABASE_URL = config('GUSTO_DATABASE_URL')
 
-templates = Jinja2Templates(directory='templates')
+base_path = os.path.dirname(__file__)
+static_dir = os.path.join(base_path, "../static")
+template_dir = os.path.join(base_path, "../templates")
+
+templates = Jinja2Templates(directory=template_dir)
 templates.env.variable_start_string = "[["
 templates.env.variable_end_string = "]]"
 
@@ -88,14 +92,14 @@ def shutdown():
     LOG.debug("Shudown complete. bye 👋")
 
 
+print(static_dir)
 app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes=[
     Route('/', homepage),
     Route('/recipes', recipes),
-    Mount('/static', StaticFiles(directory='static'), name='static'),
+    Mount('/static', StaticFiles(directory=static_dir), name='static'),
     Route('/api/mealplan', mealplan),
     Route('/api/recipes', api_recipes),
     Route('/api/regen_meal', regen_meal, methods=['POST']),
     Route('/api/regen_mealplan', regen_mealplan, methods=['POST']),
     Route('/api/export', api_export, methods=['POST']),
 ])
-

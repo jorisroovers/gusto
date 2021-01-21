@@ -12,16 +12,11 @@ poetry install
 
 poetry shell
 
-cd gusto
-
-# Configure
-export GUSTO_RECIPES="../config/Meal-Planning.csv"; export DATABASE_URL="sqlite:///../gusto.db"
-
 # Run cli
 python gusto/gusto/cli.py -r $GUSTO_RECIPES -w 1
 
 # run webapp
-uvicorn --reload --log-config ../config/logconfig.ini gusto.web:app
+uvicorn --reload --log-config config/logconfig.ini --app-dir gusto --env-file config/config-local.env gusto.web:app
 ```
 
 #  Docker

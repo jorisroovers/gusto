@@ -29,7 +29,7 @@ class RecipesController(Controller):
     def import_from_csv(self, filename) -> None:
         LOG.debug("Reading from %s", filename)
         recipes = {}
-        existing_recipes = {(recipe.name, recipe) for recipe in self.list()}
+        existing_recipes = dict({(recipe.name, recipe) for recipe in self.list()})
         with open(filename) as csv_file:
             records = csv.DictReader(csv_file)
             record_count = 0
