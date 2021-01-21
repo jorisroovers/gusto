@@ -20,11 +20,20 @@ def upgrade():
     op.create_table(
         'recipes',
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', sa.Unicode(75), nullable=False),
+        sa.Column('name', sa.Unicode(75), nullable=False, unique=True),
         sa.Column('description', sa.Unicode(200)), # not currently used
         sa.Column('comments', sa.Unicode(200)),
         sa.Column('url', sa.Unicode(200)),
         sa.Column('tags', sa.Unicode(200)),
+    )
+
+    op.create_table(
+        'meals',
+        sa.Column('id', sa.Integer, primary_key=True),
+        # For now, only 1 meal a day (we can introduce meal-types later,
+        # but then the tuple (mealtype, date) will have to be unique)
+        sa.Column('date', sa.Date, nullable=False, unique=True),
+        sa.Column('recipe_id', sa.Integer, sa.ForeignKey("recipes.id"), nullable=False),
     )
 
 def downgrade():

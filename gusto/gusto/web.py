@@ -9,7 +9,7 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from .mealplan import MealPlan, MealPlanGenerator, RecipesController
+from .mealplan import MealPlan, MealPlanGenerator, ImportController,  RecipesController
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
@@ -61,7 +61,8 @@ async def mealplan(request):
     return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
 
 async def api_recipes(request):
-    return JSONResponse({'recipes': request.app.state.recipes.recipes})
+    controller = RecipesController(app.state.db_session)
+    return JSONResponse({'recipes': [r.as_dict() for r in controller.list()]})
 
 async def api_export(request):
     request.app.state.mealplan.export_to_csv("export.csv")
@@ -74,12 +75,13 @@ async def startup():
     Session = sessionmaker(bind=engine)
     app.state.db_session = Session()
 
-    recipes = RecipesController(app.state.db_session)
+    importer = ImportController(app.state.db_session)
     LOG.debug("NEW")
-    print(recipes.list())
-    recipes.import_from_csv(os.path.realpath(RECIPES_CSV))
-    app.state.recipes = recipes
-    app.state.mealplan_generator = MealPlanGenerator(app.state.recipes)
+    # print(recipes.list())
+    importer.import_from_csv(os.path.realpath(RECIPES_CSV))
+
+    recipes_controller = RecipesController(app.state.db_session)
+    # app.state.mealplan_generator = MealPlanGenerator(recipes_controller.list())
     # Next Monday
     start_date  = arrow.utcnow().shift(weekday=0)
     # This week's Monday

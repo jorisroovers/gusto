@@ -5,7 +5,7 @@ import random
 import uuid
 from os import name
 
-
+import arrow
 from rich.console import Console
 
 LOG = logging.getLogger("gusto.mealplan")
@@ -18,18 +18,14 @@ class Controller:
     def __init__(self, db_session) -> None:
         self.db = db_session
 
-class RecipesController(Controller):
+class ImportController(Controller):
     def __init__(self, db_session) -> None:
         super().__init__(db_session)
-        self.recipes = []
-
-    def list(self):
-        return self.db.query(models.Recipe).all()
 
     def import_from_csv(self, filename) -> None:
         LOG.debug("Reading from %s", filename)
         recipes = {}
-        existing_recipes = dict({(recipe.name, recipe) for recipe in self.list()})
+        existing_recipes = dict({(recipe.name, recipe) for recipe in self.db.query(models.Recipe).all()})
         with open(filename) as csv_file:
             records = csv.DictReader(csv_file)
             record_count = 0
@@ -39,20 +35,37 @@ class RecipesController(Controller):
                 recipes[record['Name']] = record
 
                 # TODO: continue here:
-                # - actually fix this lookup here, because it's still adding duplicate records
-                # - add other fields to DB records being added
-                # - this is really a mealplan import from the Notion CSV, this should create DB records in different
-                #   tables: recipes, meals, etc
                 # - remove return value. We should just do another list() operation to get all recipes/meals
 
-                if record['Name'] not in existing_recipes:
-                    db_record = models.Recipe(name=record['Name'])
-                    self.db.add(db_record)
+                recipe  = existing_recipes.get(record['Name'], False)
+
+                if not recipe:
+                    recipe = models.Recipe(name=record['Name'], description="", comments=record['Comments'],
+                            url=record['URL'], tags=",".join(record['parsed-tags']))
+                    self.db.add(recipe)
+                    existing_recipes[recipe.name] = recipe
+                    self.db.commit()
+                
+                if record['Date'] != '':
+                    mealplan_date = arrow.get(record['Date'], "MMM D, YYYY").date()
+                    existing_meal = self.db.query(models.Meal).filter(models.Meal.date==mealplan_date).first()
+                    
+                    # If there's already a meal in the database for the date,
+                    # don't overwrite (this would error out anyways because of unique constraint)
+                    if not existing_meal:
+                        meal = models.Meal(recipe_id=recipe.id, date=mealplan_date)
+                        self.db.add(meal)
+                        self.db.commit()
+
 
             LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from {filename}")
         self.db.commit()
-        self.recipes.extend(recipes.values())
 
+
+class RecipesController(Controller):
+    
+    def list(self):
+        return self.db.query(models.Recipe).all()
 
 class Constraint:
     def __init__(self, title: str, match_func = None) -> None:
