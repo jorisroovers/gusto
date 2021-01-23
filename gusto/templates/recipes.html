@@ -12,9 +12,9 @@
         </thead>
         <tbody>
             <tr v-for="recipe in recipes">
-                <td class="no-wrap">{{ recipe.Name }}</td>
+                <td class="no-wrap">{{ recipe.name }}</td>
                 <td>
-                    <span class="tag" :data-value="tag" v-for="tag in recipe['parsed-tags']">
+                    <span class="tag" :data-value="tag" v-for="tag in recipe.tags">
                         {{tag}}
                     </span>
                 </td>

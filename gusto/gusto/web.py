@@ -9,7 +9,10 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from .mealplan import MealPlan, MealPlanGenerator, ImportController,  RecipesController
+from .mealplan import MealPlan, MealPlanGenerator, Importer
+from .controllers import GustoController
+
+from . import models
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
@@ -57,12 +60,21 @@ async def regen_meal(request):
     LOG.debug("Regenerated Mealplan %s", request.app.state.mealplan)
     return JSONResponse({'status': "success"})
 
+async def api_meals(request):
+    controller = GustoController(request, models.Meal)
+    filters = []
+    if 'after' in request.query_params:
+        filters.append(models.Meal.date >= request.query_params['after'])
+    if 'before' in request.query_params:
+        filters.append(models.Meal.date < request.query_params['before'])
+    return JSONResponse({'meals': controller.filter(*filters) })
+
 async def mealplan(request):
     return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
 
 async def api_recipes(request):
-    controller = RecipesController(app.state.db_session)
-    return JSONResponse({'recipes': [r.as_dict() for r in controller.list()]})
+    controller = GustoController(request, models.Recipe)
+    return JSONResponse({'recipes': controller.list()})
 
 async def api_export(request):
     request.app.state.mealplan.export_to_csv("export.csv")
@@ -75,12 +87,11 @@ async def startup():
     Session = sessionmaker(bind=engine)
     app.state.db_session = Session()
 
-    importer = ImportController(app.state.db_session)
+    importer = Importer(app.state.db_session)
     LOG.debug("NEW")
     # print(recipes.list())
     importer.import_from_csv(os.path.realpath(RECIPES_CSV))
 
-    recipes_controller = RecipesController(app.state.db_session)
     # app.state.mealplan_generator = MealPlanGenerator(recipes_controller.list())
     # Next Monday
     start_date  = arrow.utcnow().shift(weekday=0)
@@ -93,12 +104,11 @@ def shutdown():
     app.state.db_session.close()
     LOG.debug("Shudown complete. bye 👋")
 
-
-print(static_dir)
 app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes=[
     Route('/', homepage),
     Route('/recipes', recipes),
     Mount('/static', StaticFiles(directory=static_dir), name='static'),
+    Route('/api/meals', api_meals),
     Route('/api/mealplan', mealplan),
     Route('/api/recipes', api_recipes),
     Route('/api/regen_meal', regen_meal, methods=['POST']),

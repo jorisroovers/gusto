@@ -28,14 +28,14 @@
                 <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
                 <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
                 <td>
-                    <a v-if="meal.recipe.URL" :href="meal.recipe.URL" target="_blank">
-                        {{ meal.recipe.Name }}
+                    <a v-if="meal.recipe.url" :href="meal.recipe.url" target="_blank">
+                        {{ meal.recipe.name }}
                     </a>
-                    <template v-else>{{ meal.recipe.Name }}</template>
+                    <template v-else>{{ meal.recipe.name }}</template>
                 </td>
-                <td class="no-wrap">{{ meal.constraint.title }}</td>
+                <td class="no-wrap">{{ meal.constraint == null ? "NA" : meal.constraint.title }}</td>
                 <td class="no-wrap">
-                    <span class="tag" :data-value="tag" v-for="tag in meal.recipe['parsed-tags']">
+                    <span class="tag" :data-value="tag" v-for="tag in meal.recipe.tags">
                         {{tag}}
                     </span>
                 </td>

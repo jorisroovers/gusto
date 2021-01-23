@@ -12,15 +12,13 @@ LOG = logging.getLogger("gusto.mealplan")
 console = Console()
 
 from . import models
+from .controllers import GustoController
 
-class Controller:
+from .constraints import Constraint, TagConstraint, CONSTRAINTS
 
+class Importer:
     def __init__(self, db_session) -> None:
         self.db = db_session
-
-class ImportController(Controller):
-    def __init__(self, db_session) -> None:
-        super().__init__(db_session)
 
     def import_from_csv(self, filename) -> None:
         LOG.debug("Reading from %s", filename)
@@ -61,47 +59,6 @@ class ImportController(Controller):
             LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from {filename}")
         self.db.commit()
 
-
-class RecipesController(Controller):
-    
-    def list(self):
-        return self.db.query(models.Recipe).all()
-
-class Constraint:
-    def __init__(self, title: str, match_func = None) -> None:
-        self.id = str(uuid.uuid4())
-        self.title = title
-        self.match_func = match_func
-
-    def match(self, recipe: dict) -> bool:
-        if self.match_func:
-            return self.match_func(recipe)
-        return False
-
-    def for_json(self) -> dict:
-        return {"id": self.id, "title": self.title}
-
-
-class TagConstraint(Constraint):
-
-    def __init__(self, title , included_tags, excluded_tags) -> None:
-        super().__init__(title)
-        self.included_tags = included_tags
-        self.excluded_tags = excluded_tags
-
-    def match(self, recipe: dict) -> bool:
-        return all(tag in recipe['parsed-tags'] for tag in self.included_tags) and \
-               all(tag not in recipe['parsed-tags'] for tag in self.excluded_tags )
-
-
-MEAL_CONSTRAINTS = [ TagConstraint("Veggie Dag", ["Vegetarisch"], ["Zondigen", "Overschot", "Exclude"]), 
-                     TagConstraint("Vis Dag", ["Vis"], ["Zondigen", "Overschot", "Exclude"]), 
-                     TagConstraint("Asian Dag", ["Asian"], ["Zondigen", "Overschot", "Exclude"]),
-                     TagConstraint("Steak Dag", ["Steak"], ["Zondigen", "Overschot", "Exclude"]),
-                     TagConstraint("Pasta Dag", ["Pasta"], ["Zondigen", "Overschot", "Exclude"]),
-                     TagConstraint("Vrije Dag", [], ["Zondigen", "Overschot", "Exclude"])
-                    ]
-
 class Meal:
 
     def __init__(self, recipe: dict, date, constraint) -> None:
@@ -140,6 +97,11 @@ class MealPlan:
                 })
                 exporter.writerow(meal.recipe)
 
+
+
+WEEK_CONSTRAINTS = [
+    CONSTRAINTS['veggie-day'], CONSTRAINTS['fish-day'], CONSTRAINTS['asian-day'], CONSTRAINTS['steak-day'], CONSTRAINTS['pasta-day'], CONSTRAINTS['free-day'],
+]
 class MealPlanGenerator:
 
     def __init__(self, recipes) -> None:
@@ -150,7 +112,7 @@ class MealPlanGenerator:
         day_offset = 0
         for _ in range(num_weeks):
             # Add some randomness to when we eat what, but ensure Friday is "Zondigen"
-            day_constraints = copy.copy(MEAL_CONSTRAINTS)
+            day_constraints = copy.copy(WEEK_CONSTRAINTS)
             random.shuffle(day_constraints)
             day_constraints.insert(4, Constraint("Vettige Vrijdag", lambda r: "Zondigen" in r['parsed-tags']))
             

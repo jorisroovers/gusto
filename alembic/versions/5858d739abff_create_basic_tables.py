@@ -33,6 +33,7 @@ def upgrade():
         # For now, only 1 meal a day (we can introduce meal-types later,
         # but then the tuple (mealtype, date) will have to be unique)
         sa.Column('date', sa.Date, nullable=False, unique=True),
+        sa.Column('constraint_name', sa.Unicode),
         sa.Column('recipe_id', sa.Integer, sa.ForeignKey("recipes.id"), nullable=False),
     )
 
