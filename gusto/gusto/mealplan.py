@@ -8,6 +8,8 @@ from os import name
 import arrow
 from rich.console import Console
 
+from collections import Counter
+
 LOG = logging.getLogger("gusto.mealplan")
 console = Console()
 
@@ -22,28 +24,45 @@ class Importer:
 
     def import_from_csv(self, filename) -> None:
         LOG.debug("Reading from %s", filename)
-        recipes = {}
         existing_recipes = dict({(recipe.name, recipe) for recipe in self.db.query(models.Recipe).all()})
+        existing_tags  = dict({(tag.name, tag) for tag in self.db.query(models.Tag).all()})
+
+        counters = Counter({"records":0, "tags":0, "recipes":0, "meals":0})
+
         with open(filename) as csv_file:
             records = csv.DictReader(csv_file)
-            record_count = 0
+            
             for record in records:
-                record_count+=1
-                record['parsed-tags'] = [l.strip() for l in record['Tags'].split(",") if l.strip() != ""]
-                recipes[record['Name']] = record
+                counters['records']+=1
 
-                # TODO: continue here:
-                # - remove return value. We should just do another list() operation to get all recipes/meals
+                # Import tags
+                # Note: because we always import tags that we find, there might be cases where we import a tag
+                # but don't end up importing the recipe (because it's a duplicate or if some error occurs), that's
+                # probably good enough for now
+                parsed_tags = [l.strip() for l in record['Tags'].split(",") if l.strip() != ""]
+                canonical_tags = []
+                for tag in parsed_tags:
+                    canonical_tag = existing_tags.get(tag.lower(), False)
+                    if not canonical_tag:
+                        canonical_tag = models.Tag(name = tag.lower(), display_name=tag)
+                        self.db.add(canonical_tag)
+                        existing_tags[canonical_tag.name] = canonical_tag
+                        counters['tags']+=1
 
+                    canonical_tags.append(canonical_tag)
+                self.db.commit()
+
+                # Import recipes
                 recipe  = existing_recipes.get(record['Name'], False)
-
                 if not recipe:
                     recipe = models.Recipe(name=record['Name'], description="", comments=record['Comments'],
-                            url=record['URL'], tags=",".join(record['parsed-tags']))
+                            url=record['URL'], tags=",".join([t.name for t in canonical_tags]))
                     self.db.add(recipe)
                     existing_recipes[recipe.name] = recipe
                     self.db.commit()
+                    counters['recipes']+=1
                 
+                # Import meals
                 if record['Date'] != '':
                     mealplan_date = arrow.get(record['Date'], "MMM D, YYYY").date()
                     existing_meal = self.db.query(models.Meal).filter(models.Meal.date==mealplan_date).first()
@@ -54,10 +73,11 @@ class Importer:
                         meal = models.Meal(recipe_id=recipe.id, date=mealplan_date)
                         self.db.add(meal)
                         self.db.commit()
+                        counters['meals']+=1
 
-
-            LOG.info(f"Read {record_count} recipes ({len(recipes)} unique) from {filename}")
         self.db.commit()
+        LOG.info(f"Read {counters['records']} records from {filename}.")
+        LOG.info(f"Inserted {counters['recipes']} recipes, {counters['meals']} meals, {counters['tags']} tags")
 
 class Meal:
 

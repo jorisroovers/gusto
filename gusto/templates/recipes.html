@@ -3,19 +3,48 @@
 <section class="section" id="recipes">
     <h1 class="is-size-4">Recipes</h1>
     <div><strong>{{ recipes.length }}</strong> recipes</div>
+    <div class="field is-horizontal">
+        <div class="field-body">
+            <div class="field">
+                <label class="label">New Recipe</label>
+                <p class="control is-expanded">
+                    <input class="input" type="text" placeholder="e.g. Lasagna">
+                </p>
+            </div>
+            <div class="field">
+                <label class="label">Tags</label>
+                <p class="control is-expanded">
+                    <input class="input" type="text" placeholder="e.g.: Kip, Zondigen">
+                </p>
+            </div>
+            <div class="field">
+                <label class="label">&nbsp;</label>
+                <p class="control">
+                    <button class="button is-primary">Add </button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+
     <table class="table is-striped" id="recipes-table">
         <thead>
             <tr>
-                <th>Recipe</th>
-                <th>Tags</th>
+                <th>Recipe
+                    <input v-model="recipeNameFilter" class="input" type="text" id="filter-recipes" placeholder="Filter Recipes">
+                </th>
+                <th>Tags
+                    <input v-model="recipeTagFilter" class="input" type="text" id="filter-tags" placeholder="Filter tags (+ to combine tags: kip+salade)">
+                </th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="recipe in recipes">
+            <tr v-for="recipe in filteredRecipes">
                 <td class="no-wrap">{{ recipe.name }}</td>
                 <td>
-                    <span class="tag" :data-value="tag" v-for="tag in recipe.tags">
-                        {{tag}}
+                    <span class="tag" :data-value="tag.name" v-for="tag in recipe.tags" v-on:click="addTagFilter(tag)">
+                        {{tag.display_name}}
                     </span>
                 </td>
             </tr>

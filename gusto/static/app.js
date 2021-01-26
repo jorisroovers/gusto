@@ -63,7 +63,31 @@ var recipes = new Vue({
         this.fetchData();
     },
     data: {
-        recipes: []
+        recipes: [],
+        recipeNameFilter: "",
+        recipeTagFilter: "",
+    },
+    // Note: `computed` does NOT work in nested rendering loops (so when you use a v:for inside another v:for)
+    // in that case you need to call a function
+    computed: {
+        filteredRecipes: function () {
+            const recipeNameFilter = this.recipeNameFilter.toLowerCase()
+            const recipeTagFilter = this.recipeTagFilter.toLowerCase()
+            return this.recipes.filter(function (recipe) {
+                const nameMatch = recipeNameFilter == "" || recipe.name.toLowerCase().indexOf(recipeNameFilter) >= 0
+                let allTagMatch = true;
+                if (recipeTagFilter != "") {
+                    for (tagFilter of recipeTagFilter.split("+")) {
+                        tagMatch = false;
+                        for (tag of recipe.tags) {
+                            tagMatch = tagMatch || tag.display_name.toLowerCase().indexOf(tagFilter) >= 0
+                        }
+                        allTagMatch = allTagMatch && tagMatch;
+                    }
+                }
+                return nameMatch && allTagMatch;
+            })
+        }
     },
     methods: {
         fetchData() {
@@ -74,6 +98,13 @@ var recipes = new Vue({
                 .then(function (response) {
                     self.recipes = response.data.recipes
                 })
+        },
+        addTagFilter(tag) {
+            if (this.recipeTagFilter == "") {
+                this.recipeTagFilter += tag.display_name
+            } else {
+                this.recipeTagFilter += "+" + tag.display_name
+            }
         }
     }
 });

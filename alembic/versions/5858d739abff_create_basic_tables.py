@@ -18,6 +18,12 @@ depends_on = None
 
 def upgrade():
     op.create_table(
+        'tags',
+        sa.Column('name', sa.Unicode(75), primary_key=True),
+        sa.Column('display_name', sa.Unicode(200))
+    )
+
+    op.create_table(
         'recipes',
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('name', sa.Unicode(75), nullable=False, unique=True),

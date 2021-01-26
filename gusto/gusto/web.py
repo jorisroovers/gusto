@@ -86,10 +86,9 @@ async def startup():
     engine = sqlalchemy.create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     app.state.db_session = Session()
+    models.startup(app.state.db_session)
 
     importer = Importer(app.state.db_session)
-    LOG.debug("NEW")
-    # print(recipes.list())
     importer.import_from_csv(os.path.realpath(RECIPES_CSV))
 
     # app.state.mealplan_generator = MealPlanGenerator(recipes_controller.list())

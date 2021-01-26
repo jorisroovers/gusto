@@ -12,51 +12,72 @@
     margin: 0 2px;
 }
 
-.tag[data-value="Vis"] {
+#recipes-table .tag {
+    cursor: pointer;
+}
+
+.tag[data-value="vis"] {
     background-color: rgb(141, 177, 245);
     color: white;
 }
 
-.tag[data-value="Salade"] {
+.tag[data-value="salade"] {
     background-color: rgb(145, 245, 141);
 }
 
-.tag[data-value="Pasta"] {
+.tag[data-value="pasta"] {
     background-color: rgb(245, 221, 141);
 }
 
-.tag[data-value="Kip"] {
+.tag[data-value="aardappel"] {
+    background-color: rgb(245, 221, 141);
+    border: 2px solid rgb(167, 101, 2);
+}
+
+.tag[data-value="kip"] {
     background-color: rgb(177, 135, 0);
     color: white;
 }
 
-.tag[data-value="Vegetarisch"] {
+.tag[data-value="kip"]:before {
+    content: "🍗\00a0\00a0";
+}
+
+.tag[data-value="vegetarisch"] {
     background-color: rgb(13, 167, 7);
     color: white;
 }
 
-.tag[data-value="Brood"] {
+.tag[data-value="brood"] {
     background-color: rgb(134, 82, 2);
     color: white;
 }
 
-.tag[data-value="Zondigen"] {
+.tag[data-value="brood"]:before {
+    content: "🥖\00a0\00a0";
+}
+
+.tag[data-value="zondigen"] {
     background-color: rgb(179, 25, 5);
     color: white;
 }
 
-.tag[data-value="Steak"] {
+.tag[data-value="steak"] {
     background-color: rgb(245, 173, 173);
 }
 
-.tag[data-value="Asian"] {
+.tag[data-value="steak"]:before {
+    content: "🥩\00a0\00a0";
+}
+
+.tag[data-value="asian"] {
     background-color: rgb(232, 247, 22);
 }
 
-.tag[data-value="Italiaans"] {
+.tag[data-value="italiaans"] {
     background-color: white;
     color: green;
-    border: 1px solid  rgb(179, 25, 5);
+    border: 1px solid rgb(179, 25, 5);
 }
 
 
