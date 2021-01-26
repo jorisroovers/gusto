@@ -8,7 +8,7 @@ python-versions = "*"
 
 [[package]]
 name = "aiosqlite"
-version = "0.16.0"
+version = "0.16.1"
 description = "asyncio bridge to the standard sqlite3 module"
 category = "main"
 optional = false
@@ -19,17 +19,17 @@ typing_extensions = ">=3.7.2"
 
 [[package]]
 name = "alembic"
-version = "1.4.3"
+version = "1.5.2"
 description = "A database migration tool for SQLAlchemy."
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 
 [package.dependencies]
 Mako = "*"
 python-dateutil = "*"
 python-editor = ">=0.3"
-SQLAlchemy = ">=1.1.0"
+SQLAlchemy = ">=1.3.0"
 
 [[package]]
 name = "arrow"
@@ -111,7 +111,7 @@ i18n = ["Babel (>=0.8)"]
 
 [[package]]
 name = "mako"
-version = "1.1.3"
+version = "1.1.4"
 description = "A super-fast templating language that borrows the  best ideas from the existing templating languages."
 category = "main"
 optional = false
@@ -134,7 +134,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
 [[package]]
 name = "pygments"
-version = "2.7.3"
+version = "2.7.4"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "main"
 optional = false
@@ -172,7 +172,7 @@ python-versions = "*"
 
 [[package]]
 name = "rich"
-version = "9.6.1"
+version = "9.9.0"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
@@ -260,12 +260,12 @@ aiofiles = [
     {file = "aiofiles-0.6.0.tar.gz", hash = "sha256:e0281b157d3d5d59d803e3f4557dcc9a3dff28a4dd4829a9ff478adae50ca092"},
 ]
 aiosqlite = [
-    {file = "aiosqlite-0.16.0-py3-none-any.whl", hash = "sha256:0e5b8465b0b6aa7f2b0a1fa7f3af53216fcea1947f524b658bd4b4696e72f1b7"},
-    {file = "aiosqlite-0.16.0.tar.gz", hash = "sha256:d014ef07fbc523b2d195fc17cf35982285e3220eb73c1068d5df37b569950ea8"},
+    {file = "aiosqlite-0.16.1-py3-none-any.whl", hash = "sha256:1df802815bb1e08a26c06d5ea9df589bcb8eec56e5f3378103b0f9b223c6703c"},
+    {file = "aiosqlite-0.16.1.tar.gz", hash = "sha256:2e915463164efa65b60fd1901aceca829b6090082f03082618afca6fb9c8fdf7"},
 ]
 alembic = [
-    {file = "alembic-1.4.3-py2.py3-none-any.whl", hash = "sha256:4e02ed2aa796bd179965041afa092c55b51fb077de19d61835673cc80672c01c"},
-    {file = "alembic-1.4.3.tar.gz", hash = "sha256:5334f32314fb2a56d86b4c4dd1ae34b08c03cae4cb888bc699942104d66bc245"},
+    {file = "alembic-1.5.2-py2.py3-none-any.whl", hash = "sha256:c057488cc8ac7c4d06025ea3907e1a4dd07af70376fa149cf6bd2bc11b43076f"},
+    {file = "alembic-1.5.2.tar.gz", hash = "sha256:a4de8d3525a95a96d59342e14b95cab5956c25b0907dce1549bb4e3e7958f4c2"},
 ]
 arrow = [
     {file = "arrow-0.17.0-py2.py3-none-any.whl", hash = "sha256:e098abbd9af3665aea81bdd6c869e93af4feb078e98468dd351c383af187aac5"},
@@ -296,8 +296,7 @@ jinja2 = [
     {file = "Jinja2-2.11.2.tar.gz", hash = "sha256:89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0"},
 ]
 mako = [
-    {file = "Mako-1.1.3-py2.py3-none-any.whl", hash = "sha256:93729a258e4ff0747c876bd9e20df1b9758028946e976324ccd2d68245c7b6a9"},
-    {file = "Mako-1.1.3.tar.gz", hash = "sha256:8195c8c1400ceb53496064314c6736719c6f25e7479cd24c77be3d9361cddc27"},
+    {file = "Mako-1.1.4.tar.gz", hash = "sha256:17831f0b7087c313c0ffae2bcbbd3c1d5ba9eeac9c38f2eb7b50e8c99fe9d5ab"},
 ]
 markupsafe = [
     {file = "MarkupSafe-1.1.1-cp27-cp27m-macosx_10_6_intel.whl", hash = "sha256:09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161"},
@@ -335,8 +334,8 @@ markupsafe = [
     {file = "MarkupSafe-1.1.1.tar.gz", hash = "sha256:29872e92839765e546828bb7754a68c418d927cd064fd4708fab9fe9c8bb116b"},
 ]
 pygments = [
-    {file = "Pygments-2.7.3-py3-none-any.whl", hash = "sha256:f275b6c0909e5dafd2d6269a656aa90fa58ebf4a74f8fcf9053195d226b24a08"},
-    {file = "Pygments-2.7.3.tar.gz", hash = "sha256:ccf3acacf3782cbed4a989426012f1c535c9a90d3a7fc3f16d231b9372d2b716"},
+    {file = "Pygments-2.7.4-py3-none-any.whl", hash = "sha256:bc9591213a8f0e0ca1a5e68a479b4887fdc3e75d0774e5c71c31920c427de435"},
+    {file = "Pygments-2.7.4.tar.gz", hash = "sha256:df49d09b498e83c1a73128295860250b0b7edd4c723a32e9bc0d295c7c2ec337"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
@@ -354,8 +353,8 @@ python-editor = [
     {file = "python_editor-1.0.4-py3.5.egg", hash = "sha256:c3da2053dbab6b29c94e43c486ff67206eafbe7eb52dbec7390b5e2fb05aac77"},
 ]
 rich = [
-    {file = "rich-9.6.1-py3-none-any.whl", hash = "sha256:064814e6cfbc61ff1f82b1e950667c5dc3bf3ec3ed9ca6f62a29007d1bc5ed4c"},
-    {file = "rich-9.6.1.tar.gz", hash = "sha256:5ac9f4f7f6b0e32e7e412de127f15b94144e22c9a7896551474d640143bbaa7b"},
+    {file = "rich-9.9.0-py3-none-any.whl", hash = "sha256:d376396cb3793a042f6167cd613a31a370ea2c5ec1bbdf76a5c9e9c588ccff12"},
+    {file = "rich-9.9.0.tar.gz", hash = "sha256:0bd8f42c3a03b7ef5e311d5e37f47bea9d268f541981c169072be5869c007957"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},

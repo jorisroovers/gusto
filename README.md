@@ -22,7 +22,7 @@ uvicorn --reload --log-config config/logconfig.ini --app-dir gusto --env-file co
 #  Docker
 ```sh
 docker build -t gusto:latest .
-docker run -d --name gusto -p 8000:80 --env-file config/config.env  -v $(pwd)/config:/config  gusto
+docker run --rm -d --name gusto -p 8000:80 --env-file config/config-docker.env  -v $(pwd)/config:/config -v $(pwd)/gusto.db:/data/gusto.db gusto
 ```
 
 # Alembic
