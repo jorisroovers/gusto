@@ -88,8 +88,10 @@ async def startup():
     app.state.db_session = Session()
     models.startup(app.state.db_session)
 
-    importer = Importer(app.state.db_session)
-    importer.import_from_csv(os.path.realpath(RECIPES_CSV))
+    import_file = os.path.realpath(RECIPES_CSV)
+    if os.path.exists(import_file):
+        importer = Importer(app.state.db_session)
+        importer.import_from_csv(import_file)
 
     # app.state.mealplan_generator = MealPlanGenerator(recipes_controller.list())
     # Next Monday
