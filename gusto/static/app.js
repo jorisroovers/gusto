@@ -1,3 +1,18 @@
+// Create WebSocket connection.
+const socket = new WebSocket('ws://localhost:8000/ws/navigation');
+
+// Connection opened
+socket.addEventListener('open', function (event) {
+    socket.send('Hello Server!');
+});
+
+// Listen for messages
+socket.addEventListener('message', function (event) {
+    console.log('Message from server ', event.data);
+});
+
+
+
 var mealplan = new Vue({
     el: '#mealplan',
     created() {
@@ -65,22 +80,22 @@ var recipes = new Vue({
     data: {
         recipes: [],
         recipeNameFilter: "",
-        recipeTagFilter: "",
+        recipeTagFilter: [],
     },
     // Note: `computed` does NOT work in nested rendering loops (so when you use a v:for inside another v:for)
     // in that case you need to call a function
     computed: {
         filteredRecipes: function () {
             const recipeNameFilter = this.recipeNameFilter.toLowerCase()
-            const recipeTagFilter = this.recipeTagFilter.toLowerCase()
+            const self = this
             return this.recipes.filter(function (recipe) {
                 const nameMatch = recipeNameFilter == "" || recipe.name.toLowerCase().indexOf(recipeNameFilter) >= 0
                 let allTagMatch = true;
-                if (recipeTagFilter != "") {
-                    for (tagFilter of recipeTagFilter.split("+")) {
+                if (self.recipeTagFilter.Length != 0) {
+                    for (tagFilter of self.recipeTagFilter) {
                         tagMatch = false;
                         for (tag of recipe.tags) {
-                            tagMatch = tagMatch || tag.display_name.toLowerCase().indexOf(tagFilter) >= 0
+                            tagMatch = tagMatch || tag.display_name.toLowerCase().indexOf(tagFilter.display_name.toLowerCase()) >= 0
                         }
                         allTagMatch = allTagMatch && tagMatch;
                     }
@@ -100,11 +115,10 @@ var recipes = new Vue({
                 })
         },
         addTagFilter(tag) {
-            if (this.recipeTagFilter == "") {
-                this.recipeTagFilter += tag.display_name
-            } else {
-                this.recipeTagFilter += "+" + tag.display_name
-            }
+            this.recipeTagFilter.push(tag);
+        },
+        removeTagFilter(tag) {
+            this.recipeTagFilter = this.recipeTagFilter.filter(item => item !== tag)
         }
     }
 });

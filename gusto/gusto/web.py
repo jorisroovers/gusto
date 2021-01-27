@@ -2,20 +2,21 @@ import logging
 import os
 
 import arrow
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 from starlette.applications import Starlette
 from starlette.config import Config
 from starlette.responses import JSONResponse
-from starlette.routing import Mount, Route
+from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
-
-from .mealplan import MealPlan, MealPlanGenerator, Importer
-from .controllers import GustoController
+from starlette.websockets import WebSocket
 
 from . import models
+from .controllers import GustoController
+from .mealplan import Importer, MealPlan, MealPlanGenerator
 
-import sqlalchemy
-from sqlalchemy.orm import sessionmaker
+
 
 LOG = logging.getLogger("gusto.web")
 
@@ -33,7 +34,7 @@ templates = Jinja2Templates(directory=template_dir)
 templates.env.variable_start_string = "[["
 templates.env.variable_end_string = "]]"
 
-### REQUESTS ###########################################################################################################
+### PAGES ##############################################################################################################
 
 async def homepage(request):
     return templates.TemplateResponse('mealplan.html', {'request': request})
@@ -80,7 +81,14 @@ async def api_export(request):
     request.app.state.mealplan.export_to_csv("export.csv")
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
 
-### STARTUP #############################################################################################################
+### Websockets #########################################################################################################
+
+async def mywebsocket(websocket):
+    await websocket.accept()
+    await websocket.send_text('Hello, world!')
+    await websocket.close()
+
+### STARTUP ############################################################################################################
 
 async def startup():
     engine = sqlalchemy.create_engine(DATABASE_URL)
@@ -106,13 +114,16 @@ def shutdown():
     LOG.debug("Shudown complete. bye 👋")
 
 app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes=[
+    Mount('/static', StaticFiles(directory=static_dir), name='static'),
     Route('/', homepage),
     Route('/recipes', recipes),
-    Mount('/static', StaticFiles(directory=static_dir), name='static'),
-    Route('/api/meals', api_meals),
-    Route('/api/mealplan', mealplan),
-    Route('/api/recipes', api_recipes),
-    Route('/api/regen_meal', regen_meal, methods=['POST']),
-    Route('/api/regen_mealplan', regen_mealplan, methods=['POST']),
-    Route('/api/export', api_export, methods=['POST']),
+    WebSocketRoute('/ws/navigation', mywebsocket),
+    Mount('/api', routes=[
+        Route('/meals', api_meals),
+        Route('/mealplan', mealplan),
+        Route('/recipes', api_recipes),
+        Route('/regen_meal', regen_meal, methods=['POST']),
+        Route('/regen_mealplan', regen_mealplan, methods=['POST']),
+        Route('/export', api_export, methods=['POST']),
+    ]),
 ])

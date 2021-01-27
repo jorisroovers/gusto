@@ -32,10 +32,22 @@
         <thead>
             <tr>
                 <th>Recipe
-                    <input v-model="recipeNameFilter" class="input" type="text" id="filter-recipes" placeholder="Filter Recipes">
+                    <input v-model="recipeNameFilter" class="input" type="text" id="filter-recipes"
+                        placeholder="Filter Recipes">
                 </th>
                 <th>Tags
-                    <input v-model="recipeTagFilter" class="input" type="text" id="filter-tags" placeholder="Filter tags (+ to combine tags: kip+salade)">
+                    <div id="filter-tags">
+                        <div class="field is-grouped is-grouped-multiline">
+                            <div class="control" v-for="tag in recipeTagFilter">
+                                <div class="tags has-addons">
+                                    <span class="tag" :data-value="tag.name">
+                                        {{tag.display_name}}
+                                    </span>
+                                    <a class="tag is-delete" v-on:click="removeTagFilter(tag)"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </th>
             </tr>
         </thead>
