@@ -11,12 +11,12 @@ from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from starlette.websockets import WebSocket
+from starlette.endpoints import HTTPEndpoint
+
 
 from . import models
 from .controllers import GustoController
 from .mealplan import Importer, MealPlan, MealPlanGenerator
-
-
 
 LOG = logging.getLogger("gusto.web")
 
@@ -73,13 +73,31 @@ async def api_meals(request):
 async def mealplan(request):
     return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
 
-async def api_recipes(request):
-    controller = GustoController(request, models.Recipe)
-    return JSONResponse({'recipes': controller.list()})
-
 async def api_export(request):
     request.app.state.mealplan.export_to_csv("export.csv")
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
+
+class Recipes(HTTPEndpoint):
+    async def get(self, request):
+        controller = GustoController(request, models.Recipe)
+        return JSONResponse({'recipes': controller.list()})
+
+    async def post(self, request):
+        data = await request.json()
+        controller = GustoController(request, models.Recipe)
+        LOG.debug("Adding recipe %s", data)
+        controller.create(models.Recipe(**data))
+        return JSONResponse({'status': "success"})
+class Recipe(HTTPEndpoint):
+
+    async def delete(self, request):
+        recipe_id = request.path_params['recipe_id']
+        LOG.debug("Deleting recipe %d", recipe_id)
+        controller = GustoController(request, models.Recipe)
+        controller.delete(models.Recipe.id==recipe_id)
+        return JSONResponse({'status': "success"})
+
+
 
 ### Websockets #########################################################################################################
 
@@ -121,7 +139,8 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
     Mount('/api', routes=[
         Route('/meals', api_meals),
         Route('/mealplan', mealplan),
-        Route('/recipes', api_recipes),
+        Route('/recipes', Recipes),
+        Route('/recipes/{recipe_id:int}', Recipe),
         Route('/regen_meal', regen_meal, methods=['POST']),
         Route('/regen_mealplan', regen_mealplan, methods=['POST']),
         Route('/export', api_export, methods=['POST']),

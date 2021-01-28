@@ -11,6 +11,13 @@ socket.addEventListener('message', function (event) {
     console.log('Message from server ', event.data);
 });
 
+const toggleEditButton = document.querySelector("#toggle-edit-button");
+toggleEditButton.addEventListener('click', function (event) {
+    console.log("toggle edit");
+    for (el of document.querySelectorAll(".edit-control")) {
+        el.classList.toggle("hidden");
+    }
+})
 
 
 var mealplan = new Vue({
@@ -81,6 +88,8 @@ var recipes = new Vue({
         recipes: [],
         recipeNameFilter: "",
         recipeTagFilter: [],
+        newRecipeName: "",
+        newRecipeTags: [],
     },
     // Note: `computed` does NOT work in nested rendering loops (so when you use a v:for inside another v:for)
     // in that case you need to call a function
@@ -119,6 +128,29 @@ var recipes = new Vue({
         },
         removeTagFilter(tag) {
             this.recipeTagFilter = this.recipeTagFilter.filter(item => item !== tag)
+        },
+        addRecipe() {
+            const self = this;
+            console.log("adding recipe", this.newRecipeName, this.newRecipeTags)
+            axios.post('/api/recipes', {
+                "name": this.newRecipeName
+            }).then(function (response) {
+                console.log(response)
+                self.fetchData()
+            })
+
+        },
+        deleteRecipe(recipe) {
+            console.log("deleting", recipe.name);
+            const self = this
+            if (confirm("Are you sure you want to delete this recipe?")) {
+                console.log("Actually deleting:", recipe.id);
+                axios.delete('/api/recipes/' + recipe.id)
+                    .then(function (response) {
+                        self.fetchData()
+                    })
+            }
+
         }
     }
 });

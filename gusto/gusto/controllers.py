@@ -16,3 +16,11 @@ class GustoController:
 
     def filter(self, *args):
         return self.as_dict(self.db.query(self.model).filter(*args))
+
+    def create(self, obj):
+        self.db.add(obj)
+        self.db.commit()
+
+    def delete(self, filter):
+        self.db.query(self.model).filter(filter).delete()
+        self.db.commit()

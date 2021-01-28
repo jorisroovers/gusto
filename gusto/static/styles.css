@@ -1,9 +1,35 @@
+/* Helpers */
+
 .no-wrap {
     white-space: nowrap;
 }
 
+/* Layout */
+
+nav {
+    background: #ffdd57;
+}
+
+.logo {
+    font-size: 35px;
+    line-height: 100%;
+    margin: 0 15px 0 0;
+}
+
+/* Toggle edit */
+
+.hidden {
+    display: none;
+}
+
+/* Table */
+
 #mealplan-table {
     width: 50%;
+}
+
+#recipes-table tr:hover td {
+    background: #fcecaf;
 }
 
 /* TAGS */

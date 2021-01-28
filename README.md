@@ -1,5 +1,5 @@
 # gusto
-Meal Planning tool (for personal use). Quick-and-dirty :-)
+Meal Planning tool (for personal use). **Quick-and-dirty :-)**
 
 'Gusto' is a word play on [Gusteau](https://pixar.fandom.com/wiki/Auguste_Gusteau), the legendary chef from Pixar's Ratatouille movie.
 
@@ -42,7 +42,7 @@ alembic upgrade head
 - [ ] Recipe Selection search based on constraint
 - [ ] Constraint list export
 - [ ] Export to CSV
-- [ ] Serve from docker containers
+- [x] Serve from docker containers
 - [x] Store in DB
 - [ ] Go forth/back a week
 - [x] Show constraints names in table
