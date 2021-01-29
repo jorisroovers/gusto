@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -44,7 +45,6 @@ async def recipes(request):
 
 ### API ################################################################################################################
 
-
 async def regen_mealplan(request):
     data = await request.json()
     start_date = arrow.get(data['start_date'])
@@ -77,6 +77,12 @@ async def api_export(request):
     request.app.state.mealplan.export_to_csv("export.csv")
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
 
+async def api_navigate(request):
+    LOG.debug("Navigate, websockets: %d", len(request.app.state.websockets))
+    for ws in request.app.state.websockets:
+        await ws.send_json({"url": "http://jorisroovers.com/posts?foo=bar"})
+    return JSONResponse({"status": "success"})
+
 class Recipes(HTTPEndpoint):
     async def get(self, request):
         controller = GustoController(request, models.Recipe)
@@ -94,24 +100,35 @@ class Recipe(HTTPEndpoint):
         recipe_id = request.path_params['recipe_id']
         LOG.debug("Deleting recipe %d", recipe_id)
         controller = GustoController(request, models.Recipe)
-        controller.delete(models.Recipe.id==recipe_id)
+        controller.delete(models.Recipe.id == recipe_id)
         return JSONResponse({'status': "success"})
-
 
 
 ### Websockets #########################################################################################################
 
-async def mywebsocket(websocket):
+async def ws_navigation(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text('Hello, world!')
-    await websocket.close()
+    websocket.app.state.websockets.append(websocket)
+
+    try:
+        while True:
+            msg = await asyncio.wait_for(websocket.receive(), timeout=3600.0)
+    except asyncio.exceptions.TimeoutError:
+        pass
+    finally:
+        # Always remove sockets, independent of what exception occurred
+        websocket.app.state.websockets.remove(websocket)
+        await websocket.close()
 
 ### STARTUP ############################################################################################################
+
+
 
 async def startup():
     engine = sqlalchemy.create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     app.state.db_session = Session()
+    app.state.websockets = []
     models.startup(app.state.db_session)
 
     import_file = os.path.realpath(RECIPES_CSV)
@@ -135,7 +152,7 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
     Mount('/static', StaticFiles(directory=static_dir), name='static'),
     Route('/', homepage),
     Route('/recipes', recipes),
-    WebSocketRoute('/ws/navigation', mywebsocket),
+    WebSocketRoute('/ws/navigation', ws_navigation),
     Mount('/api', routes=[
         Route('/meals', api_meals),
         Route('/mealplan', mealplan),
@@ -144,5 +161,6 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
         Route('/regen_meal', regen_meal, methods=['POST']),
         Route('/regen_mealplan', regen_mealplan, methods=['POST']),
         Route('/export', api_export, methods=['POST']),
+        Route('/navigate', api_navigate),
     ]),
 ])

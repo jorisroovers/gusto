@@ -1,21 +1,38 @@
-// Create WebSocket connection.
-const socket = new WebSocket('ws://localhost:8000/ws/navigation');
 
-// Connection opened
-socket.addEventListener('open', function (event) {
-    socket.send('Hello Server!');
-});
 
-// Listen for messages
-socket.addEventListener('message', function (event) {
-    console.log('Message from server ', event.data);
-});
 
 const toggleEditButton = document.querySelector("#toggle-edit-button");
 toggleEditButton.addEventListener('click', function (event) {
-    console.log("toggle edit");
     for (el of document.querySelectorAll(".edit-control")) {
         el.classList.toggle("hidden");
+    }
+})
+
+
+var mealplan = new Vue({
+    el: '#websocket',
+    data: {
+        ws: null,
+        status: "NA"
+    },
+    created() {
+        this.ws = new ReconnectingWebSocket("ws://" + window.location.host + "/ws/navigation");
+        const self = this
+        this.ws.addEventListener('open', function (event) {
+            console.log('Websocket Open');
+            self.status = "Open"
+        });
+
+        this.ws.addEventListener('close', function (event) {
+            console.log('Websocket Close');
+            self.status = "Closed"
+        });
+
+        this.ws.addEventListener('message', function (event) {
+            const data = JSON.parse(event.data);
+            console.log('Navigating away', data);
+            window.location.href = data.url;
+        });
     }
 })
 

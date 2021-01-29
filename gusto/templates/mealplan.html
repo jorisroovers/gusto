@@ -3,8 +3,8 @@
 <section class="section" id="mealplan">
     <h1 class="is-size-4">Mealplan</h1>
     <div>
-        <button class="button no-print" v-on:click="regenMealPlan">Regen all</button>
-        <button class="button no-print" v-on:click="exportMealplan">Export</button>
+        <button class="button no-print edit-control hidden" v-on:click="regenMealPlan">Regen all</button>
+        <button class="button no-print edit-control hidden" v-on:click="exportMealplan">Export</button>
     </div>
     <div>
         <button class="button no-print" v-on:click="changeWeek(-1)">&lt;</button>
