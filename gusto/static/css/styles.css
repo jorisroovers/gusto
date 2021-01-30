@@ -16,6 +16,10 @@ nav {
     margin: 0 15px 0 0;
 }
 
+tr.placeholder td {
+    background-color: #eee;
+}
+
 /* Toggle edit */
 
 .hidden {
@@ -28,8 +32,24 @@ nav {
     width: 50%;
 }
 
+#mealplan-table .is-today td {
+    background: #00d1b2
+}
+
 #recipes-table tr:hover td {
     background: #fcecaf;
+}
+
+/* Websocket */
+
+#websocket .fas {
+    color: rgb(179, 25, 5);
+}
+
+#websocket.open .fas {
+    color: rgb(13, 167, 7);
+
+    /* color: rgb(179, 25, 5); */
 }
 
 /* TAGS */

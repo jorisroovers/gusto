@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gusto</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.1/css/bulma.min.css">
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
 
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
@@ -39,8 +40,8 @@
         </div>
 
         <div class="navbar-end">
-            <div class="navbar-item" id="websocket">
-                {{status}}
+            <div class="navbar-item" id="websocket" v-bind:class="{'open': status == 'open'}">
+                <i class="fas fa-circle"></i>
             </div>
             <div class="navbar-item">
                 <div class="buttons no-print">

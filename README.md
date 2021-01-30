@@ -38,7 +38,7 @@ alembic upgrade head
 
 
 # TODO
-- [ ] Host Gusto on casa!
+- [x] Host Gusto on casa!
 - [ ] Recipe Selection search based on constraint
 - [ ] Constraint list export
 - [ ] Export to CSV
@@ -49,5 +49,6 @@ alembic upgrade head
 - [ ] Add pictures based on slack monitoring
 - [ ] Highlight today
 - [ ] Toggle Edit button
+- [ ] Docker DEBUG logs
 - [ ] Notification System
 - [x] Recipe Search/filter

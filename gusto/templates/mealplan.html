@@ -24,21 +24,30 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(meal, index) in mealplan" v-bind:class="{'is-selected': meal.date.isSame(new Date(), 'day')}">
+            <tr v-for="(meal, index) in mealplan"
+                v-bind:class="{'is-today': meal.date.isSame(new Date(), 'day'), 'placeholder': meal.placeholder}">
                 <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
                 <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
-                <td>
-                    <a v-if="meal.recipe.url" :href="meal.recipe.url" target="_blank">
-                        {{ meal.recipe.name }}
-                    </a>
-                    <template v-else>{{ meal.recipe.name }}</template>
-                </td>
-                <td class="no-wrap">{{ meal.constraint == null ? "NA" : meal.constraint.title }}</td>
-                <td class="no-wrap">
-                    <span class="tag" :data-value="tag.name" v-for="tag in meal.recipe.tags">
-                        {{tag.display_name}}
-                    </span>
-                </td>
+                <template v-if="meal.placeholder == true">
+                    <td>No meal planned</td>
+                    <td></td>
+                    <td></td>
+                </template>
+                <template v-else>
+                    <td>
+                        <a v-if="meal.recipe.url" :href="meal.recipe.url" target="_blank">
+                            {{ meal.recipe.name }}
+                        </a>
+                        <template v-else>{{ meal.recipe.name }}</template>
+                    </td>
+                    <td class="no-wrap">{{ meal.constraint == null ? "NA" : meal.constraint.title }}</td>
+                    <td class="no-wrap">
+                        <span class="tag" :data-value="tag.name" v-for="tag in meal.recipe.tags">
+                            {{tag.display_name}}
+                        </span>
+                    </td>
+                </template>
+
                 <td class="no-print"><button class="button" v-on:click="regenMeal(index)">Regen</button></td>
             </tr>
         </tbody>

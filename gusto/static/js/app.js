@@ -1,6 +1,4 @@
 
-
-
 const toggleEditButton = document.querySelector("#toggle-edit-button");
 toggleEditButton.addEventListener('click', function (event) {
     for (el of document.querySelectorAll(".edit-control")) {
@@ -20,12 +18,12 @@ var mealplan = new Vue({
         const self = this
         this.ws.addEventListener('open', function (event) {
             console.log('Websocket Open');
-            self.status = "Open"
+            self.status = "open"
         });
 
         this.ws.addEventListener('close', function (event) {
             console.log('Websocket Close');
-            self.status = "Closed"
+            self.status = "closed"
         });
 
         this.ws.addEventListener('message', function (event) {
@@ -84,14 +82,27 @@ var mealplan = new Vue({
             console.debug("fetchData");
             this.mealplan = []
             const self = this
+            day = self.start_date
+            let mealplanMap = {}
+            while (!day.isSame(self.end_date)) {
+                const dayStr = day.format('YYYY-MM-DD')
+                mealplanMap[dayStr] = { placeholder: true, date: day }
+                day = moment(day).add(1, 'days')
+            }
+
             axios.get('/api/meals',
                 { params: { after: self.start_date.format('YYYY-MM-DD'), before: self.end_date.format('YYYY-MM-DD') } })
                 .then(function (response) {
                     for (meal of response.data.meals) {
                         meal.date = moment(meal.date)
-                        self.mealplan.push(meal);
+                        meal.placeholder = false
+                        mealplanMap[meal.date.format('YYYY-MM-DD')] = meal
                     }
+                    console.log(Object.values(mealplanMap))
+
+                    self.mealplan = Object.values(mealplanMap)
                 })
+
         }
     }
 })
