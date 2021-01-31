@@ -21,6 +21,8 @@ from .mealplan import Importer, MealPlan, MealPlanGenerator
 
 LOG = logging.getLogger("gusto.web")
 
+websockets = []
+
 ### CONFIG #############################################################################################################
 
 config = Config(".env")
@@ -80,7 +82,13 @@ async def api_export(request):
 async def api_navigate(request):
     LOG.debug("Navigate, websockets: %d", len(request.app.state.websockets))
     for ws in request.app.state.websockets:
-        await ws.send_json({"url": "http://jorisroovers.com/posts?foo=bar"})
+        try:
+            await ws.accept()
+            await ws.send_json({"url": "http://jorisroovers.com/posts?foo=bar"})
+        except Exception:
+            LOG.debug("Error during api navigate")
+            pass
+
     return JSONResponse({"status": "success"})
 
 class Recipes(HTTPEndpoint):
@@ -112,13 +120,17 @@ async def ws_navigation(websocket: WebSocket):
 
     try:
         while True:
+            LOG.debug("Websocket nav, websockets: %d", len(websocket.app.state.websockets))
             msg = await asyncio.wait_for(websocket.receive(), timeout=3600.0)
-    except asyncio.exceptions.TimeoutError:
+    except (asyncio.exceptions.TimeoutError, Exception):
         pass
     finally:
+        LOG.debug("Websocket nav, running finally")
         # Always remove sockets, independent of what exception occurred
-        websocket.app.state.websockets.remove(websocket)
-        await websocket.close()
+        # websocket.app.state.websockets.remove(websocket)
+        LOG.debug("after finally, websockets: %d", len(websocket.app.state.websockets))
+
+        # await websocket.close()
 
 ### STARTUP ############################################################################################################
 
@@ -128,7 +140,7 @@ async def startup():
     engine = sqlalchemy.create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     app.state.db_session = Session()
-    app.state.websockets = []
+    app.state.websockets = websockets
     models.startup(app.state.db_session)
 
     import_file = os.path.realpath(RECIPES_CSV)

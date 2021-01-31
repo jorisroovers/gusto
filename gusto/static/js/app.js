@@ -82,6 +82,8 @@ var mealplan = new Vue({
             console.debug("fetchData");
             this.mealplan = []
             const self = this
+
+            // populate every day of the week with placeholders
             day = self.start_date
             let mealplanMap = {}
             while (!day.isSame(self.end_date)) {
@@ -90,6 +92,7 @@ var mealplan = new Vue({
                 day = moment(day).add(1, 'days')
             }
 
+            // fetch meals, replace placeholders with meals if they exist
             axios.get('/api/meals',
                 { params: { after: self.start_date.format('YYYY-MM-DD'), before: self.end_date.format('YYYY-MM-DD') } })
                 .then(function (response) {
@@ -98,8 +101,6 @@ var mealplan = new Vue({
                         meal.placeholder = false
                         mealplanMap[meal.date.format('YYYY-MM-DD')] = meal
                     }
-                    console.log(Object.values(mealplanMap))
-
                     self.mealplan = Object.values(mealplanMap)
                 })
 
