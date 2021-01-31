@@ -7,7 +7,7 @@ toggleEditButton.addEventListener('click', function (event) {
 })
 
 
-var mealplan = new Vue({
+var websocket = new Vue({
     el: '#websocket',
     data: {
         ws: null,

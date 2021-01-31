@@ -21,8 +21,6 @@ from .mealplan import Importer, MealPlan, MealPlanGenerator
 
 LOG = logging.getLogger("gusto.web")
 
-websockets = []
-
 ### CONFIG #############################################################################################################
 
 config = Config(".env")
@@ -80,11 +78,11 @@ async def api_export(request):
     return JSONResponse({'recipes': request.app.state.recipes.recipes})
 
 async def api_navigate(request):
-    LOG.debug("Navigate, websockets: %d", len(request.app.state.websockets))
+    data = await request.json()
+    LOG.debug("Sending message to websockets to navigate to %s", data['url'])
     for ws in request.app.state.websockets:
         try:
-            await ws.accept()
-            await ws.send_json({"url": "http://jorisroovers.com/posts?foo=bar"})
+            await ws.send_json({"url": data['url']})
         except Exception:
             LOG.debug("Error during api navigate")
             pass
@@ -122,25 +120,24 @@ async def ws_navigation(websocket: WebSocket):
         while True:
             LOG.debug("Websocket nav, websockets: %d", len(websocket.app.state.websockets))
             msg = await asyncio.wait_for(websocket.receive(), timeout=3600.0)
-    except (asyncio.exceptions.TimeoutError, Exception):
+    except (asyncio.exceptions.TimeoutError):
         pass
     finally:
         LOG.debug("Websocket nav, running finally")
         # Always remove sockets, independent of what exception occurred
-        # websocket.app.state.websockets.remove(websocket)
+        websocket.app.state.websockets.remove(websocket)
+        await websocket.close()
         LOG.debug("after finally, websockets: %d", len(websocket.app.state.websockets))
 
-        # await websocket.close()
 
 ### STARTUP ############################################################################################################
-
 
 
 async def startup():
     engine = sqlalchemy.create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     app.state.db_session = Session()
-    app.state.websockets = websockets
+    app.state.websockets = []
     models.startup(app.state.db_session)
 
     import_file = os.path.realpath(RECIPES_CSV)
@@ -158,7 +155,7 @@ async def startup():
 def shutdown():
     LOG.debug("Shutting Down")
     app.state.db_session.close()
-    LOG.debug("Shudown complete. bye 👋")
+    LOG.debug("Shutdown complete. bye 👋")
 
 app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes=[
     Mount('/static', StaticFiles(directory=static_dir), name='static'),
@@ -173,6 +170,6 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
         Route('/regen_meal', regen_meal, methods=['POST']),
         Route('/regen_mealplan', regen_mealplan, methods=['POST']),
         Route('/export', api_export, methods=['POST']),
-        Route('/navigate', api_navigate),
+        Route('/navigate', api_navigate, methods=['POST']),
     ]),
 ])
