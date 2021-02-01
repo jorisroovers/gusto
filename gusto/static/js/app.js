@@ -6,6 +6,11 @@ toggleEditButton.addEventListener('click', function (event) {
     }
 })
 
+const reload = document.querySelector("#reload");
+reload.addEventListener('click', function (event) {
+    location.reload(true)
+})
+
 
 var websocket = new Vue({
     el: '#websocket',

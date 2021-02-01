@@ -28,10 +28,6 @@ tr.placeholder td {
 
 /* Table */
 
-#mealplan-table {
-    width: 50%;
-}
-
 #mealplan-table .is-today td {
     background: #00d1b2
 }
@@ -143,4 +139,17 @@ tr.placeholder td {
     .tag {
         color: #000 !important;
     }
+}
+
+/* iPad mini */
+@media only screen and (width:1024px) {
+    .navbar {
+        height: 100px;
+        font-size: 150%;
+    }
+
+    .is-size-4 {
+        font-size: 125% !important;
+    }
+
 }
