@@ -1,10 +1,12 @@
 
 const toggleEditButton = document.querySelector("#toggle-edit-button");
-toggleEditButton.addEventListener('click', function (event) {
+const toggleEdit = function () {
     for (el of document.querySelectorAll(".edit-control")) {
         el.classList.toggle("hidden");
     }
-})
+}
+toggleEditButton.addEventListener('click', toggleEdit)
+toggleEdit()
 
 const reload = document.querySelector("#reload");
 reload.addEventListener('click', function (event) {

@@ -10,6 +10,12 @@ nav {
     background: #ffdd57;
 }
 
+.navbar-item.is-active {
+    background-color: #ffeaae !important;
+    font-weight: bold;
+}
+
+
 .logo {
     font-size: 35px;
     line-height: 100%;
@@ -30,6 +36,10 @@ tr.placeholder td {
 
 #mealplan-table .is-today td {
     background: #00d1b2
+}
+
+.tag-column {
+    width: 20%;
 }
 
 #recipes-table tr:hover td {
@@ -130,7 +140,6 @@ tr.placeholder td {
     .no-print * {
         display: none !important;
     }
-
 
     #mealplan-table {
         width: 100%;

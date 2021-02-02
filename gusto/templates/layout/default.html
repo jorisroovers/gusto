@@ -27,15 +27,11 @@
             </a>
         </div>
 
+
         <div class="navbar-menu">
             <div class="navbar-start">
-                <a class="navbar-item" href="/">
-                    Meal Planning
-                </a>
-
-                <a class="navbar-item" href="/recipes">
-                    Recipes
-                </a>
+                <a class="navbar-item [[ request.path == '/' and 'is-active']]" href="/">Meal Planning</a>
+                <a class="navbar-item [[ request.path == '/recipes' and 'is-active']]" href="/recipes">Recipes</a>
             </div>
         </div>
 
