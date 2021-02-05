@@ -61,14 +61,24 @@ async def regen_meal(request):
     LOG.debug("Regenerated Mealplan %s", request.app.state.mealplan)
     return JSONResponse({'status': "success"})
 
-async def api_meals(request):
-    controller = GustoController(request, models.Meal)
-    filters = []
-    if 'after' in request.query_params:
-        filters.append(models.Meal.date >= request.query_params['after'])
-    if 'before' in request.query_params:
-        filters.append(models.Meal.date < request.query_params['before'])
-    return JSONResponse({'meals': controller.filter(*filters) })
+class Meals(HTTPEndpoint):
+    async def get(self, request):
+        controller = GustoController(request, models.Meal)
+        filters = []
+        if 'after' in request.query_params:
+            filters.append(models.Meal.date >= request.query_params['after'])
+        if 'before' in request.query_params:
+            filters.append(models.Meal.date < request.query_params['before'])
+        return JSONResponse({'meals': controller.filter(*filters) })
+
+    async def post(self, request):
+        data = await request.json()
+        controller = GustoController(request, models.Meal)
+        LOG.debug("Adding meal %s", data)
+        # controller.create(models.Meal(**data))
+        LOG.debug("Creating meal")
+        return JSONResponse({'status': "success"})
+
 
 async def mealplan(request):
     return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
@@ -100,6 +110,7 @@ class Recipes(HTTPEndpoint):
         LOG.debug("Adding recipe %s", data)
         controller.create(models.Recipe(**data))
         return JSONResponse({'status': "success"})
+
 class Recipe(HTTPEndpoint):
 
     async def delete(self, request):
@@ -163,7 +174,7 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
     Route('/recipes', recipes),
     WebSocketRoute('/ws/navigation', ws_navigation),
     Mount('/api', routes=[
-        Route('/meals', api_meals),
+        Route('/meals', Meals),
         Route('/mealplan', mealplan),
         Route('/recipes', Recipes),
         Route('/recipes/{recipe_id:int}', Recipe),

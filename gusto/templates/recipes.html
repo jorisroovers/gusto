@@ -53,9 +53,7 @@
                 <td>{{ recipe.name }}</td>
                 <td><button class="button is-small is-danger edit-control" v-on:click="deleteRecipe(recipe)">Delete</button></td>
                 <td class="tag-column">
-                    <span class="tag" :data-value="tag.name" v-for="tag in recipe.tags" v-on:click="addTagFilter(tag)">
-                        {{tag.display_name}}
-                    </span>
+                    <recipe-tag v-bind:tag="tag" v-for="tag in recipe.tags" v-on:click.native="addTagFilter(tag)">
                 </td>
             </tr>
         </tbody>

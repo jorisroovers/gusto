@@ -41,6 +41,15 @@ var websocket = new Vue({
     }
 })
 
+Vue.component('recipe-tag', {
+    props: ['tag'],
+    template: `
+    <span class="tag" :data-value="tag.name">
+        {{tag.display_name}}
+    </span>
+    `
+})
+
 Vue.component('meal-row-placeholder', {
     props: ['meal'],
     data: function () {
@@ -99,6 +108,7 @@ Vue.component('recipe-selector', {
         selectRecipe: function (recipe) {
             this.selectedRecipe = recipe
             this.isActive = false
+            this.$emit('selected', this.selectedRecipe);
         }
     },
     template: `
@@ -115,7 +125,8 @@ Vue.component('recipe-selector', {
     <div class="dropdown-menu" id="dropdown-menu" role="menu">
         <div class="dropdown-content">
         <a href="#" class="dropdown-item" v-for="recipe in recipes" v-on:click="selectRecipe(recipe)">
-            {{ recipe.name }}
+            <span>{{ recipe.name }}</span>
+            <recipe-tag v-bind:tag="tag" v-for="tag in recipe.tags" />
         </a>
         </div>
     </div>
@@ -128,7 +139,7 @@ Vue.component('recipe-selector', {
 Vue.component('meal-row-edit', {
     props: ['meal'],
     data: function () {
-        return { recipes: [] }
+        return { recipes: [], newMeal: this.meal }
     },
     created() {
         const self = this
@@ -137,13 +148,29 @@ Vue.component('meal-row-edit', {
                 self.recipes = response.data.recipes
             })
     },
+    methods: {
+        recipeChanged(newRecipe) {
+            this.$set(this.newMeal, 'recipe', newRecipe)
+            // this.newMeal.recipe = newRecipe
+        },
+        save() {
+            console.log(this.newMeal)
+            axios.post('/api/meals', {
+                "meal": this.newMeal
+            }).then(function (response) {
+                console.log(response)
+                // self.fetchData()
+            })
+        }
+    },
     template: `
     <tr>
         <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
         <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
-        <td><recipe-selector v-bind:recipes="recipes" /></td>
+        <td><recipe-selector v-bind:recipes="recipes" @selected="recipeChanged" /></td>
         <td></td>
-        <td></td>
+        <td><template v-if="newMeal.recipe"><recipe-tag v-bind:tag="tag" v-for="tag in newMeal.recipe.tags" /></template></td>
+        <td><button class="button" v-on:click="save()">Save</button></td>
     </tr>
     `
 })
