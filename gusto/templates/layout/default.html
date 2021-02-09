@@ -19,7 +19,7 @@
 </head>
 
 <body>
-    <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+    <nav id="navbar" class="navbar is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="/">
                 <span class="logo">👨🏻‍🍳</span>
@@ -36,8 +36,8 @@
         </div>
 
         <div class="navbar-end">
-            <div class="navbar-item" id="reload">
-                <button class="button is-text">
+            <div class="navbar-item">
+                <button class="button is-text" v-on:click="reloadPage()">
                     <span class="icon">
                         <i class="fas fa-sync-alt"></i>
                     </span>
@@ -46,12 +46,10 @@
 
 
             </div>
-            <div class="navbar-item" id="websocket" v-bind:class="{'open': status == 'open'}">
-                <i class="fas fa-circle"></i>
-            </div>
+            <websocket-status></websocket-status>
             <div class="navbar-item">
                 <div class="buttons no-print">
-                    <button class="button" id="toggle-edit-button">Toggle Edit</button>
+                    <button class="button" v-on:click="toggleEdit()">Toggle Edit</button>
                 </div>
             </div>
         </div>

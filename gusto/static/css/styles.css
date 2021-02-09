@@ -29,8 +29,20 @@ tr.placeholder td {
 /* Toggle edit */
 
 .hidden {
-    display: none;
+    /* display: none; */
+    /* visibility: hidden; */
 }
+
+.show {
+    /* display: unset !important; */
+    visibility: visible !important;
+}
+
+.edit-control {
+    /* display: none; */
+    visibility: hidden;
+}
+
 
 /* Table */
 

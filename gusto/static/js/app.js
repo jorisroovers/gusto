@@ -1,24 +1,11 @@
 
-const toggleEditButton = document.querySelector("#toggle-edit-button");
-const toggleEdit = function () {
-    for (el of document.querySelectorAll(".edit-control")) {
-        el.classList.toggle("hidden");
-    }
-}
-toggleEditButton.addEventListener('click', toggleEdit)
-toggleEdit()
-
-const reload = document.querySelector("#reload");
-reload.addEventListener('click', function (event) {
-    location.reload(true)
-})
-
-
-var websocket = new Vue({
-    el: '#websocket',
-    data: {
-        ws: null,
-        status: "NA"
+Vue.component('websocket-status', {
+    props: [],
+    data: function () {
+        return {
+            ws: null,
+            status: "NA"
+        }
     },
     created() {
         this.ws = new ReconnectingWebSocket("ws://" + window.location.host + "/ws/navigation");
@@ -38,6 +25,25 @@ var websocket = new Vue({
             console.log('Navigating away', data);
             window.location.href = data.url;
         });
+    },
+    template: `
+    <div class="navbar-item" id="websocket" v-bind:class="{'open': status == 'open'}">
+        <i class="fas fa-circle"></i>
+    </div>
+    `
+})
+
+const navbar = new Vue({
+    el: '#navbar',
+    methods: {
+        reloadPage() {
+            location.reload(true)
+        },
+        toggleEdit() {
+            for (el of document.querySelectorAll(".edit-control")) {
+                el.classList.toggle("show");
+            }
+        }
     }
 })
 
@@ -74,6 +80,14 @@ Vue.component('meal-row-normal', {
             count: 0
         }
     },
+    methods: {
+        deleteMeal() {
+            console.log("deleting")
+            axios.delete(`/api/meal/${this.meal.id}`).then(function (response) {
+                console.log(response)
+            })
+        },
+    },
     template: `
     <tr>
         <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
@@ -83,6 +97,7 @@ Vue.component('meal-row-normal', {
                 {{ meal.recipe.name }}
             </a>
             <template v-else>{{ meal.recipe.name }}</template>
+            <button class="button" v-on:click="$emit('editMeal')">edit</button>
         </td>
         <td class="no-wrap">{{ meal.constraint == null ? "NA" : meal.constraint.title }}</td>
         <td class="no-wrap">
@@ -90,6 +105,7 @@ Vue.component('meal-row-normal', {
                 {{tag.display_name}}
             </span>
         </td>
+        <td><button class="button is-danger" v-on:click="deleteMeal()">Delete</button></td>
     </tr>
     `
 })
@@ -134,8 +150,6 @@ Vue.component('recipe-selector', {
     `
 })
 
-
-
 Vue.component('meal-row-edit', {
     props: ['meal'],
     data: function () {
@@ -151,12 +165,10 @@ Vue.component('meal-row-edit', {
     methods: {
         recipeChanged(newRecipe) {
             this.$set(this.newMeal, 'recipe', newRecipe)
-            // this.newMeal.recipe = newRecipe
         },
         save() {
-            console.log(this.newMeal)
             axios.post('/api/meals', {
-                "meal": this.newMeal
+                "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
             }).then(function (response) {
                 console.log(response)
                 // self.fetchData()
@@ -181,11 +193,16 @@ Vue.component('meal-row', {
     computed: {
         classObject: function () {
             return { 'is-today': this.meal.date.isSame(new Date(), 'day') }
+        },
+    },
+    methods: {
+        editMeal() {
+            console.log("Editing meal")
         }
     },
     template: `
         <meal-row-edit v-bind:class="classObject" v-bind:meal="meal" v-if="meal.placeholder" />
-        <meal-row-normal v-bind:class="classObject" v-bind:meal="meal" v-else />
+        <meal-row-normal v-bind:class="classObject" v-bind:meal="meal" @editMeal="editMeal()" v-else />
     `
 })
 

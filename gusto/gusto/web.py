@@ -75,10 +75,18 @@ class Meals(HTTPEndpoint):
         data = await request.json()
         controller = GustoController(request, models.Meal)
         LOG.debug("Adding meal %s", data)
-        # controller.create(models.Meal(**data))
+        controller.create(models.Meal(date=arrow.get(data['meal']['date']).date(), recipe_id=data['meal']['recipe_id']))
         LOG.debug("Creating meal")
         return JSONResponse({'status': "success"})
 
+class Meal(HTTPEndpoint):
+
+    async def delete(self, request):
+        meal_id = request.path_params['meal_id']
+        LOG.debug("Deleting meal %d", meal_id)
+        controller = GustoController(request, models.Meal)
+        controller.delete(models.Meal.id == meal_id)
+        return JSONResponse({'status': "success"})
 
 async def mealplan(request):
     return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
@@ -175,6 +183,7 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
     WebSocketRoute('/ws/navigation', ws_navigation),
     Mount('/api', routes=[
         Route('/meals', Meals),
+        Route('/meal/{meal_id:int}', Meal),
         Route('/mealplan', mealplan),
         Route('/recipes', Recipes),
         Route('/recipes/{recipe_id:int}', Recipe),
