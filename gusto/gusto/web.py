@@ -61,6 +61,25 @@ async def regen_meal(request):
     LOG.debug("Regenerated Mealplan %s", request.app.state.mealplan)
     return JSONResponse({'status': "success"})
 
+async def mealplan(request):
+    return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
+
+async def api_export(request):
+    request.app.state.mealplan.export_to_csv("export.csv")
+    return JSONResponse({'recipes': request.app.state.recipes.recipes})
+
+async def api_navigate(request):
+    data = await request.json()
+    LOG.debug("Sending message to websockets to navigate to %s", data['url'])
+    for ws in request.app.state.websockets:
+        try:
+            await ws.send_json({"url": data['url']})
+        except Exception:
+            LOG.debug("Error during api navigate")
+            pass
+
+    return JSONResponse({"status": "success"})
+
 class Meals(HTTPEndpoint):
     async def get(self, request):
         controller = GustoController(request, models.Meal)
@@ -83,29 +102,18 @@ class Meal(HTTPEndpoint):
 
     async def delete(self, request):
         meal_id = request.path_params['meal_id']
-        LOG.debug("Deleting meal %d", meal_id)
         controller = GustoController(request, models.Meal)
         controller.delete(models.Meal.id == meal_id)
         return JSONResponse({'status': "success"})
 
-async def mealplan(request):
-    return JSONResponse({'mealplan': request.app.state.mealplan.for_json()})
-
-async def api_export(request):
-    request.app.state.mealplan.export_to_csv("export.csv")
-    return JSONResponse({'recipes': request.app.state.recipes.recipes})
-
-async def api_navigate(request):
-    data = await request.json()
-    LOG.debug("Sending message to websockets to navigate to %s", data['url'])
-    for ws in request.app.state.websockets:
-        try:
-            await ws.send_json({"url": data['url']})
-        except Exception:
-            LOG.debug("Error during api navigate")
-            pass
-
-    return JSONResponse({"status": "success"})
+    async def get(self, request):
+        controller = GustoController(request, models.Meal)
+        meal = None
+        if 'meal_id' in request.path_params:
+            meal = controller.get(models.Meal.id == request.path_params['meal_id'])
+        elif 'date' in request.query_params:
+            meal = controller.first(models.Meal.date == request.query_params['date'])
+        return JSONResponse({'meal':  meal})
 
 class Recipes(HTTPEndpoint):
     async def get(self, request):
@@ -183,6 +191,7 @@ app = Starlette(debug=True, on_startup=[startup], on_shutdown=[shutdown], routes
     WebSocketRoute('/ws/navigation', ws_navigation),
     Mount('/api', routes=[
         Route('/meals', Meals),
+        Route('/meal', Meal),
         Route('/meal/{meal_id:int}', Meal),
         Route('/mealplan', mealplan),
         Route('/recipes', Recipes),

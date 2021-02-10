@@ -83,8 +83,9 @@ python gusto/gusto/cli.py -r $GUSTO_RECIPES -w 1
 - [x] Show constraints names in table
 - [ ] Add pictures based on slack monitoring
 - [ ] Highlight today
-- [ ] Toggle Edit button
+- [x] Toggle Edit button
 - [ ] Docker DEBUG logs
 - [ ] Notification System
 - [x] Recipe Search/filter
+- [ ] Adding tags to recipes when adding new recipes
 - [ ] 

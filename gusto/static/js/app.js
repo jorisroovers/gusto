@@ -82,9 +82,10 @@ Vue.component('meal-row-normal', {
     },
     methods: {
         deleteMeal() {
-            console.log("deleting")
+            const self = this
             axios.delete(`/api/meal/${this.meal.id}`).then(function (response) {
-                console.log(response)
+                console.log("deleted meal")
+                self.$emit('reloadMeal');
             })
         },
     },
@@ -111,28 +112,28 @@ Vue.component('meal-row-normal', {
 })
 
 Vue.component('recipe-selector', {
-    props: ['recipes'],
+    props: ['recipes', "initialItem"],
     data: function () {
-        return { isActive: false, selectedRecipe: null }
+        return { isActive: false, selectedItem: this.initialItem }
     },
     computed: {
         classObject: function () {
             return { 'is-active': this.isActive }
-        }
+        },
     },
     methods: {
         selectRecipe: function (recipe) {
-            this.selectedRecipe = recipe
+            this.selectedItem = recipe
             this.isActive = false
-            this.$emit('selected', this.selectedRecipe);
+            this.$emit('selected', this.selectedItem);
         }
     },
     template: `
     <div class="dropdown" v-bind:class="classObject" >
     <div class="dropdown-trigger" v-on:click="isActive=!isActive">
         <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-        <span v-if="selectedRecipe==null">Select a recipe</span>
-        <span v-else>{{selectedRecipe.name}}</span>
+        <span v-if="selectedItem==null">Select a recipe</span>
+        <span v-else>{{selectedItem.name}}</span>
         <span class="icon is-small">
             <i class="fas fa-angle-down" aria-hidden="true"></i>
         </span>
@@ -140,6 +141,7 @@ Vue.component('recipe-selector', {
     </div>
     <div class="dropdown-menu" id="dropdown-menu" role="menu">
         <div class="dropdown-content">
+        <input type="input"> 
         <a href="#" class="dropdown-item" v-for="recipe in recipes" v-on:click="selectRecipe(recipe)">
             <span>{{ recipe.name }}</span>
             <recipe-tag v-bind:tag="tag" v-for="tag in recipe.tags" />
@@ -167,11 +169,11 @@ Vue.component('meal-row-edit', {
             this.$set(this.newMeal, 'recipe', newRecipe)
         },
         save() {
+            const self = this
             axios.post('/api/meals', {
                 "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
             }).then(function (response) {
-                console.log(response)
-                // self.fetchData()
+                self.$emit('reloadMeal');
             })
         }
     },
@@ -179,7 +181,7 @@ Vue.component('meal-row-edit', {
     <tr>
         <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
         <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
-        <td><recipe-selector v-bind:recipes="recipes" @selected="recipeChanged" /></td>
+        <td><recipe-selector v-bind:recipes="recipes" v-bind:initialItem="meal.recipe" @selected="recipeChanged" /></td>
         <td></td>
         <td><template v-if="newMeal.recipe"><recipe-tag v-bind:tag="tag" v-for="tag in newMeal.recipe.tags" /></template></td>
         <td><button class="button" v-on:click="save()">Save</button></td>
@@ -190,19 +192,41 @@ Vue.component('meal-row-edit', {
 
 Vue.component('meal-row', {
     props: ['meal'],
+    data: function () {
+        return { editing: this.meal.placeholder, editableMeal: this.meal }
+    },
     computed: {
         classObject: function () {
-            return { 'is-today': this.meal.date.isSame(new Date(), 'day') }
+            return { 'is-today': this.editableMeal.date.isSame(new Date(), 'day') }
         },
     },
     methods: {
         editMeal() {
             console.log("Editing meal")
+            this.editing = true;
+        },
+        extendMeal(meal) {
+            const extendedMeal = { date: moment(meal.date), placeholder: false, recipe: meal.recipe };
+            return extendedMeal
+        },
+        reloadMeal() {
+            const dateStr = this.editableMeal.date.format('YYYY-MM-DD')
+            const self = this
+            axios.get('/api/meal', { params: { date: dateStr } })
+                .then(function (response) {
+                    console.log("reload meal", response.data)
+                    if (response.data.meal == null) {
+                        self.$set(self.editableMeal, 'placeholder', true)
+                    } else {
+                        this.editableMeal = self.extendMeal(response.data.meal)
+                    }
+                    self.editing = false
+                })
         }
     },
     template: `
-        <meal-row-edit v-bind:class="classObject" v-bind:meal="meal" v-if="meal.placeholder" />
-        <meal-row-normal v-bind:class="classObject" v-bind:meal="meal" @editMeal="editMeal()" v-else />
+        <meal-row-edit v-bind:class="classObject" v-bind:meal="editableMeal" @reloadMeal="reloadMeal()" v-if="this.editing" />
+        <meal-row-normal v-bind:class="classObject" v-bind:meal="editableMeal" @reloadMeal="reloadMeal()" @editMeal="editMeal()" v-else />
     `
 })
 
