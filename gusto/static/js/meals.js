@@ -1,60 +1,4 @@
 
-Vue.component('websocket-status', {
-    props: [],
-    data: function () {
-        return {
-            ws: null,
-            status: "NA"
-        }
-    },
-    created() {
-        this.ws = new ReconnectingWebSocket("ws://" + window.location.host + "/ws/navigation");
-        const self = this
-        this.ws.addEventListener('open', function (event) {
-            console.log('Websocket Open');
-            self.status = "open"
-        });
-
-        this.ws.addEventListener('close', function (event) {
-            console.log('Websocket Close');
-            self.status = "closed"
-        });
-
-        this.ws.addEventListener('message', function (event) {
-            const data = JSON.parse(event.data);
-            console.log('Navigating away', data);
-            window.location.href = data.url;
-        });
-    },
-    template: `
-    <div class="navbar-item" id="websocket" v-bind:class="{'open': status == 'open'}">
-        <i class="fas fa-circle"></i>
-    </div>
-    `
-})
-
-const navbar = new Vue({
-    el: '#navbar',
-    methods: {
-        reloadPage() {
-            location.reload(true)
-        },
-        toggleEdit() {
-            for (el of document.querySelectorAll(".edit-control")) {
-                el.classList.toggle("show");
-            }
-        }
-    }
-})
-
-Vue.component('recipe-tag', {
-    props: ['tag'],
-    template: `
-    <span class="tag" :data-value="tag.name">
-        {{tag.display_name}}
-    </span>
-    `
-})
 
 Vue.component('meal-row-placeholder', {
     props: ['meal'],
@@ -170,11 +114,26 @@ Vue.component('meal-row-edit', {
         },
         save() {
             const self = this
-            axios.post('/api/meals', {
-                "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
-            }).then(function (response) {
-                self.$emit('reloadMeal');
-            })
+            console.log(self.meal)
+            if (self.meal.recipe == null) {
+                console.log("Saving new meal", self.newMeal)
+                axios.post('/api/meals', {
+                    "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
+                }).then(function (response) {
+                    self.$emit('reloadMeal');
+                })
+            } else {
+                console.log("Updating existing meal", self.newMeal)
+                // axios.put('/api/meal/', {
+                //     "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
+                // }).then(function (response) {
+                //     self.$emit('reloadMeal');
+                // })
+            }
+
+
+
+
         }
     },
     template: `
@@ -184,7 +143,7 @@ Vue.component('meal-row-edit', {
         <td><recipe-selector v-bind:recipes="recipes" v-bind:initialItem="meal.recipe" @selected="recipeChanged" /></td>
         <td></td>
         <td><template v-if="newMeal.recipe"><recipe-tag v-bind:tag="tag" v-for="tag in newMeal.recipe.tags" /></template></td>
-        <td><button class="button" v-on:click="save()">Save</button></td>
+        <td><button class="button" :disabled="newMeal.recipe == null" v-on:click="save()">Save</button></td>
     </tr>
     `
 })
@@ -302,79 +261,3 @@ var mealplan = new Vue({
         }
     }
 })
-
-var recipes = new Vue({
-    el: '#recipes',
-    created() {
-        this.fetchData();
-    },
-    data: {
-        recipes: [],
-        recipeNameFilter: "",
-        recipeTagFilter: [],
-        newRecipeName: "",
-        newRecipeTags: [],
-    },
-    // Note: `computed` does NOT work in nested rendering loops (so when you use a v:for inside another v:for)
-    // in that case you need to call a function
-    computed: {
-        filteredRecipes: function () {
-            const recipeNameFilter = this.recipeNameFilter.toLowerCase()
-            const self = this
-            return this.recipes.filter(function (recipe) {
-                const nameMatch = recipeNameFilter == "" || recipe.name.toLowerCase().indexOf(recipeNameFilter) >= 0
-                let allTagMatch = true;
-                if (self.recipeTagFilter.Length != 0) {
-                    for (tagFilter of self.recipeTagFilter) {
-                        tagMatch = false;
-                        for (tag of recipe.tags) {
-                            tagMatch = tagMatch || tag.display_name.toLowerCase().indexOf(tagFilter.display_name.toLowerCase()) >= 0
-                        }
-                        allTagMatch = allTagMatch && tagMatch;
-                    }
-                }
-                return nameMatch && allTagMatch;
-            })
-        }
-    },
-    methods: {
-        fetchData() {
-            console.log("fetchData -- recipes")
-            this.recipes = []
-            const self = this
-            axios.get('/api/recipes')
-                .then(function (response) {
-                    self.recipes = response.data.recipes
-                })
-        },
-        addTagFilter(tag) {
-            this.recipeTagFilter.push(tag);
-        },
-        removeTagFilter(tag) {
-            this.recipeTagFilter = this.recipeTagFilter.filter(item => item !== tag)
-        },
-        addRecipe() {
-            const self = this;
-            console.log("adding recipe", this.newRecipeName, this.newRecipeTags)
-            axios.post('/api/recipes', {
-                "name": this.newRecipeName
-            }).then(function (response) {
-                console.log(response)
-                self.fetchData()
-            })
-
-        },
-        deleteRecipe(recipe) {
-            console.log("deleting", recipe.name);
-            const self = this
-            if (confirm("Are you sure you want to delete this recipe?")) {
-                console.log("Actually deleting:", recipe.id);
-                axios.delete('/api/recipes/' + recipe.id)
-                    .then(function (response) {
-                        self.fetchData()
-                    })
-            }
-
-        }
-    }
-});

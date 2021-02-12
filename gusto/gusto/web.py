@@ -115,6 +115,14 @@ class Meal(HTTPEndpoint):
             meal = controller.first(models.Meal.date == request.query_params['date'])
         return JSONResponse({'meal':  meal})
 
+    async def put(self, request):
+        controller = GustoController(request, models.Meal)
+        meal_id = request.path_params['meal_id']
+        data = await request.json()
+        LOG.debug("Updating meal %s with %s", meal_id, data)
+        # meal = controller.first(models.Meal.date == request.query_params['date'])
+        return JSONResponse({'status': "success"})
+
 class Recipes(HTTPEndpoint):
     async def get(self, request):
         controller = GustoController(request, models.Recipe)
