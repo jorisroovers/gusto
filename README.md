@@ -36,6 +36,12 @@ These are tools I've considered/used and that didn't (fully) fit my needs
 - https://grocy.info/
 - https://www.notion.so/ (=spreadsheet/database approach)
 
+# Techstack
+- [Starlette](https://www.starlette.io/): Python backend framework (lightweight ASGI framework/toolkit)
+- [Vue.js](https://vuejs.org/): Front-end javascript framework
+- [Bulma](https://bulma.io/): CSS
+- 
+
 # Usage
 
 ```sh

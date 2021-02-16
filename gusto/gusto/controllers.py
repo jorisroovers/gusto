@@ -35,3 +35,9 @@ class GustoController:
     def delete(self, filter):
         self.db.query(self.model).filter(filter).delete()
         self.db.commit()
+
+    def update(self, filter, update):
+        self.db.query(self.model).filter(filter).update(update)
+        self.db.commit()
+
+

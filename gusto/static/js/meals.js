@@ -38,7 +38,7 @@ Vue.component('meal-row-normal', {
         <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
         <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
         <td>
-            <a v-if="meal.recipe.url" :href="meal.recipe.url" target="_blank">
+            <a v-if="meal.recipe && meal.recipe.url" :href="meal.recipe.url" target="_blank">
                 {{ meal.recipe.name }}
             </a>
             <template v-else>{{ meal.recipe.name }}</template>
@@ -99,7 +99,7 @@ Vue.component('recipe-selector', {
 Vue.component('meal-row-edit', {
     props: ['meal'],
     data: function () {
-        return { recipes: [], newMeal: this.meal }
+        return { recipes: [], chosenRecipe: this.meal.recipe }
     },
     created() {
         const self = this
@@ -110,28 +110,27 @@ Vue.component('meal-row-edit', {
     },
     methods: {
         recipeChanged(newRecipe) {
-            this.$set(this.newMeal, 'recipe', newRecipe)
+            this.chosenRecipe = newRecipe
+            // this.$set(this., 'recipe', newRecipe)
         },
         save() {
             const self = this
             console.log(self.meal)
             if (self.meal.recipe == null) {
-                console.log("Saving new meal", self.newMeal)
+                console.log("Saving new meal", self.meal, self.chosenRecipe.id)
                 axios.post('/api/meals', {
-                    "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
+                    "meal": { "date": self.meal.date.format('YYYY-MM-DD'), "recipe_id": self.chosenRecipe.id }
                 }).then(function (response) {
                     self.$emit('reloadMeal');
                 })
             } else {
-                console.log("Updating existing meal", self.newMeal)
-                // axios.put('/api/meal/', {
-                //     "meal": { "date": this.newMeal.date.format('YYYY-MM-DD'), "recipe_id": this.newMeal.recipe.id }
-                // }).then(function (response) {
-                //     self.$emit('reloadMeal');
-                // })
+                console.log("Updating existing meal", self.meal.id)
+                axios.put(`/api/meal/${self.meal.id}`, {
+                    "recipe_id": this.chosenRecipe.id
+                }).then(function (response) {
+                    self.$emit('reloadMeal');
+                })
             }
-
-
 
 
         }
@@ -140,10 +139,10 @@ Vue.component('meal-row-edit', {
     <tr>
         <td class="no-wrap">{{ meal.date.format('dddd') }}</td>
         <td class="no-wrap">{{ meal.date.format('YYYY-MM-DD') }}</td>
-        <td><recipe-selector v-bind:recipes="recipes" v-bind:initialItem="meal.recipe" @selected="recipeChanged" /></td>
+        <td><recipe-selector v-bind:recipes="recipes" v-bind:initialItem="chosenRecipe" @selected="recipeChanged" /></td>
         <td></td>
-        <td><template v-if="newMeal.recipe"><recipe-tag v-bind:tag="tag" v-for="tag in newMeal.recipe.tags" /></template></td>
-        <td><button class="button" :disabled="newMeal.recipe == null" v-on:click="save()">Save</button></td>
+        <td><template v-if="chosenRecipe"><recipe-tag v-bind:tag="tag" v-for="tag in chosenRecipe.tags" /></template></td>
+        <td><button class="button" :disabled="chosenRecipe == null" v-on:click="save()">Save</button></td>
     </tr>
     `
 })
@@ -152,7 +151,7 @@ Vue.component('meal-row-edit', {
 Vue.component('meal-row', {
     props: ['meal'],
     data: function () {
-        return { editing: this.meal.placeholder, editableMeal: this.meal }
+        return { editing: this.meal.recipe == null, editableMeal: this.meal }
     },
     computed: {
         classObject: function () {
@@ -164,10 +163,6 @@ Vue.component('meal-row', {
             console.log("Editing meal")
             this.editing = true;
         },
-        extendMeal(meal) {
-            const extendedMeal = { date: moment(meal.date), placeholder: false, recipe: meal.recipe };
-            return extendedMeal
-        },
         reloadMeal() {
             const dateStr = this.editableMeal.date.format('YYYY-MM-DD')
             const self = this
@@ -175,9 +170,11 @@ Vue.component('meal-row', {
                 .then(function (response) {
                     console.log("reload meal", response.data)
                     if (response.data.meal == null) {
-                        self.$set(self.editableMeal, 'placeholder', true)
+                        // this.$set(this., 'recipe', newRecipe)
+                        self.editableMeal = new PlaceHolderMeal(dateStr)
                     } else {
-                        this.editableMeal = self.extendMeal(response.data.meal)
+                        self.$set(self, 'editableMeal', Meal.fromJSON(response.data.meal))
+                        // this.editableMeal = Meal.fromJSON(response.data.meal)
                     }
                     self.editing = false
                 })
@@ -185,6 +182,7 @@ Vue.component('meal-row', {
     },
     template: `
         <meal-row-edit v-bind:class="classObject" v-bind:meal="editableMeal" @reloadMeal="reloadMeal()" v-if="this.editing" />
+        <meal-row-placeholder v-bind:class="classObject" v-bind:meal="editableMeal" @reloadMeal="reloadMeal()" v-else-if="this.editableMeal.recipe == null" />
         <meal-row-normal v-bind:class="classObject" v-bind:meal="editableMeal" @reloadMeal="reloadMeal()" @editMeal="editMeal()" v-else />
     `
 })
@@ -242,7 +240,7 @@ var mealplan = new Vue({
             let mealplanMap = {}
             while (!day.isSame(self.end_date)) {
                 const dayStr = day.format('YYYY-MM-DD')
-                mealplanMap[dayStr] = { placeholder: true, date: day }
+                mealplanMap[dayStr] = new PlaceHolderMeal(day)
                 day = moment(day).add(1, 'days')
             }
 
@@ -251,9 +249,8 @@ var mealplan = new Vue({
                 { params: { after: self.start_date.format('YYYY-MM-DD'), before: self.end_date.format('YYYY-MM-DD') } })
                 .then(function (response) {
                     for (meal of response.data.meals) {
-                        meal.date = moment(meal.date)
-                        meal.placeholder = false
-                        mealplanMap[meal.date.format('YYYY-MM-DD')] = meal
+                        let mealObj = Meal.fromJSON(meal)
+                        mealplanMap[mealObj.date.format('YYYY-MM-DD')] = mealObj
                     }
                     self.mealplan = Object.values(mealplanMap)
                 })

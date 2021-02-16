@@ -120,7 +120,7 @@ class Meal(HTTPEndpoint):
         meal_id = request.path_params['meal_id']
         data = await request.json()
         LOG.debug("Updating meal %s with %s", meal_id, data)
-        # meal = controller.first(models.Meal.date == request.query_params['date'])
+        controller.update(models.Meal.id == meal_id, {'recipe_id': data['recipe_id'] })
         return JSONResponse({'status': "success"})
 
 class Recipes(HTTPEndpoint):

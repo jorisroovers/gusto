@@ -19,10 +19,23 @@ class Recipe {
 }
 
 class Meal {
-    // TODO
 
-    construct(data) {
-        this.data = data
+    constructor(id, date, recipe, constraint) {
+        this.id = id
+        this.date = moment(date)
+        this.recipe = recipe
+        this.constraint = constraint
+    }
+
+    static fromJSON(data) {
+        return new Meal(data.id, data.date, Recipe.fromJSON(data.recipe), data.constraint)
+    }
+
+}
+
+class PlaceHolderMeal extends Meal {
+    constructor(date) {
+        super(null, date, null, null)
     }
 
 }
